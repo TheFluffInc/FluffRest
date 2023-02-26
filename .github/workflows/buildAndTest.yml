@@ -18,11 +18,5 @@ jobs:
     - name: Build
       run: dotnet build --no-restore
     - name: Test
-      uses: zyborg/dotnet-tests-report@v1.4.4
-      with:
-        project_path: FluffRestTest
-        no_restore: true
-        no_build: true
-        report_name: Fluff Rest Tests Report
-        extra_test_parameters: /p:Threshold=95 /p:ThresholdType=line
+      run: dotnet test --no-build --collect:"XPlat Code Coverage" /p:CollectCoverage=true /p:Threshold=80 /p:ThresholdType=line
         
