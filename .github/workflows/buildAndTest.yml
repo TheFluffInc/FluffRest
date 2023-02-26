@@ -24,7 +24,6 @@ jobs:
     - name: Test & Coverage
       uses: b3b00/coverlet-action@1.2.4
       with:
-        output: coverage.cobertura.xml
-        outputFormat: cobertura
+        outputFormat: lcov
         testProject: FluffRestTest/FluffRestTest.csproj
         threshold: 95
