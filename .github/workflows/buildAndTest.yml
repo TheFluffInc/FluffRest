@@ -22,7 +22,7 @@ jobs:
     - name: Grab Test Result
       run: mv $(find testOutput/ -name '*.xml') ./coverage.cobertura.xml
     - name: Generate report
-      run: dotnet reportgenerator -reports:"./coverage.cobertura.xml" -targetdir:"report" -reporttypes:Html
+      run: dotnet reportgenerator -reports:"coverage.cobertura.xml" -targetdir:"report" -reporttypes:Html
     - name: Upload Test Report
       uses: actions/upload-artifact@v3.1.2
       with:
