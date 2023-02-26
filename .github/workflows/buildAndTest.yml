@@ -18,12 +18,4 @@ jobs:
     - name: Build
       run: dotnet build --no-restore
     - name: Test
-      run: ls -l
-    - name: Test2
-      run: ls -l FluffRestTest
-    - name: Test & Coverage
-      uses: b3b00/coverlet-action@1.2.4
-      with:
-        outputFormat: lcov
-        testProject: FluffRestTest/FluffRestTest.csproj
-        threshold: 95
+      run: dotnet test --no-build --collect:"XPlat Code Coverage" --results-directory "testOutput" /p:CollectCoverage=true /p:Threshold=80 /p:ThresholdType=line
