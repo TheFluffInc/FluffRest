@@ -22,5 +22,5 @@ jobs:
       with:
         output: coverage.cobertura.xml
         outputFormat: cobertura
-        testProject: FluffRestTest
+        testProject: FluffRestTest/FluffRestTest.csproj
         threshold: 95
