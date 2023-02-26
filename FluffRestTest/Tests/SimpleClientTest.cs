@@ -1,4 +1,5 @@
 ﻿using FluffRest.Client;
+using FluffRest.Exception;
 using FluffRestTest.Dto;
 using FluffRestTest.Infra;
 using System.Collections.Generic;
@@ -126,7 +127,7 @@ namespace FluffRestTest.Tests
             var result = await fluffClient.Request(method, "simple").ExecAsync<TestUserDto>();
 
             // Assert
-            Assert.IsNotNull(result);
+            Assert.IsNotNull(result); 
             Assert.AreEqual(result.Id, dto.Id);
             Assert.AreEqual(result.Name, dto.Name);
         }
