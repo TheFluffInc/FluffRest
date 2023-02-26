@@ -20,7 +20,7 @@ jobs:
     - name: Test
       run: dotnet test --no-build --collect:"XPlat Code Coverage" --results-directory "testOutput" /p:CollectCoverage=true /p:Threshold=95 /p:ThresholdType=line
     - name: Generate report
-      run: dotnet reportgenerator -reports:"testOutput/*/coverage.cobertura.xml" -targetdir:"report" -reporttypes:Html
+      run: dotnet reportgenerator -reports:"$(find testOutput/ -name '*.xml')" -targetdir:"report" -reporttypes:Html
     - name: Upload Test Report
       uses: actions/upload-artifact@v3.1.2
       with:
