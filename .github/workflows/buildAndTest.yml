@@ -18,14 +18,11 @@ jobs:
     - name: Build
       run: dotnet build --no-restore
     - name: Test
-      run: dotnet test --no-build --collect:"XPlat Code Coverage" --results-directory "testOutput" /p:CollectCoverage=true /p:Threshold=95 /p:ThresholdType=line
-    - name: Grab Test Result
-      run: mv $(find testOutput/ -name '*.xml') ./coverage.cobertura.xml
-    - name: Generate report
-      run: dotnet reportgenerator -reports:"coverage.cobertura.xml" -targetdir:"report" -reporttypes:Html
-    - name: Upload Test Report
-      uses: actions/upload-artifact@v3.1.2
+      uses: zyborg/dotnet-tests-report@v1.4.4
       with:
-        name: TestReport
-        path: report
-        retention-days: 5
+        project_path: FluffRestTest/FluffRestTest.csproj
+        no_restore: true
+        no_build: true
+        report_name: Fluff Rest Tests Report
+        extra_test_parameters: /p:Threshold=95 /p:ThresholdType=line
+        
