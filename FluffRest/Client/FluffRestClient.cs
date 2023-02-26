@@ -1,6 +1,7 @@
 ﻿using FluffRest.Exception;
 using FluffRest.Request;
 using FluffRest.Settings;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading;
@@ -10,9 +11,11 @@ namespace FluffRest.Client
 {
     public class FluffRestClient : IFluffRestClient
     {
+        private const string AuthorizationHeader = "Authorization";
         private readonly string _baseUrl;
         private readonly HttpClient _httpClient;
         private readonly FluffClientSettings _settings;
+        private readonly Dictionary<string, string> _defaultHeaders;
 
         /// <summary>
         /// Create a new rest client, using an existing HttpClient. It can be configured via the <see cref="FluffClientSettings"/> object.
@@ -26,11 +29,56 @@ namespace FluffRest.Client
             _baseUrl = !string.IsNullOrEmpty(baseUrl) ? baseUrl : throw new System.ArgumentException($"{nameof(baseUrl)} is null or empty, please provide a base url for api calls");
             _httpClient = httpClient ?? throw new System.ArgumentException($"{nameof(httpClient)} is null, please provide a http client");
             _settings = settings ?? new FluffClientSettings();
+            _defaultHeaders = new Dictionary<string, string>();
         }
 
         public string BaseUrl => _baseUrl;
 
         public FluffClientSettings Settings => _settings;
+
+        public Dictionary<string, string> DefaultHeaders => _defaultHeaders;
+
+        #region Default Headers & Auth
+
+        public IFluffRestClient AddDefaultHeader(string key, string value)
+        {
+            if (!_defaultHeaders.ContainsKey(key))
+            {
+                _defaultHeaders.Add(key, value);
+            }
+            else
+            {
+                if (_settings.DuplicateHeaderHandling == FluffDuplicateHeaderHandling.Throw)
+                {
+                    throw new FluffDuplicateParameterException($"Duplicate default header with key '{key}'");
+                }
+                else if (_settings.DuplicateHeaderHandling == FluffDuplicateHeaderHandling.Replace)
+                {
+                    _defaultHeaders[key] = value;
+                }
+            }
+
+            return this;
+        }
+
+        public IFluffRestClient AddBasicAuth(string username, string password)
+        {
+            var plainCredentials = $"{username}:{password}";
+            var plainCredentialsBytes = System.Text.Encoding.UTF8.GetBytes(plainCredentials);
+            var base64Credientials = System.Convert.ToBase64String(plainCredentialsBytes);
+            AddDefaultHeader(AuthorizationHeader, $"Basic {base64Credientials}");
+            return this;
+        }
+
+        public IFluffRestClient AddBearerAuth(string token)
+        {
+            AddDefaultHeader(AuthorizationHeader, $"Bearer {token}");
+            return this;
+        }
+
+        #endregion
+
+        #region Request
 
         public IFluffRequest Get(string route)
         {
@@ -62,6 +110,10 @@ namespace FluffRest.Client
             return new FluffRequest(this, method, route);
         }
 
+        #endregion
+
+        #region Exec
+
         public async Task<T> ExecAsync<T>(HttpRequestMessage buildedMessage, CancellationToken cancellationToken = default)
         {
             HttpResponseMessage result = null;
@@ -86,5 +138,27 @@ namespace FluffRest.Client
                 throw new FluffRequestException("Unhandled exception occured during processing of request", stringContent, httpEx);
             }
         }
+
+        public async Task ExecAsync(HttpRequestMessage buildedMessage, CancellationToken cancellationToken = default)
+        {
+            HttpResponseMessage result = null;
+
+            try
+            {
+                result = await _httpClient.SendAsync(buildedMessage, cancellationToken);
+
+                if (_settings.EnsureSuccessCode)
+                {
+                    result.EnsureSuccessStatusCode();
+                }
+            }
+            catch (HttpRequestException httpEx)
+            {
+                var stringContent = await result.Content.ReadAsStringAsync();
+                throw new FluffRequestException("Unhandled exception occured during processing of request", stringContent, httpEx);
+            }
+        }
+
+        #endregion
     }
 }

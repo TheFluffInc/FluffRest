@@ -1,5 +1,6 @@
 ﻿using FluffRest.Request;
 using FluffRest.Settings;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,6 +18,37 @@ namespace FluffRest.Client
         /// Settings to be used globally by requests. <see cref="FluffClientSettings"/>
         /// </summary>
         FluffClientSettings Settings { get; }
+
+        /// <summary>
+        /// DO NOT TOUCH THIS, use method add default header
+        /// </summary>
+        Dictionary<string, string> DefaultHeaders { get; }
+
+        /// <summary>
+        /// Add a default header that will be added in all request made using this client.
+        /// </summary>
+        /// <param name="key">Name of the header</param>
+        /// <param name="value">Value of the header</param>
+        /// <returns></returns>
+        /// <exception cref="Exception.FluffDuplicateParameterException">Will throw if you add duplicate header keys.</exception>
+        IFluffRestClient AddDefaultHeader(string key, string value);
+
+        /// <summary>
+        /// Create the Authorization header using basic scheme that will be sent with all request made by this client.
+        /// </summary>
+        /// <param name="username">plain username</param>
+        /// <param name="password">plain password</param>
+        /// <returns></returns>
+        /// <exception cref="Exception.FluffDuplicateParameterException">Will throw if authentication is already set.</exception>
+        IFluffRestClient AddBasicAuth(string username, string password);
+
+        /// <summary>
+        /// Create the Authorization header using bearer scheme that will be sent with all request made by this client.
+        /// </summary>
+        /// <param name="token">Bearer token to send</param>
+        /// <returns></returns>
+        /// <exception cref="Exception.FluffDuplicateParameterException">Will throw if authentication is already set.</exception>
+        IFluffRestClient AddBearerAuth(string token);
 
         /// <summary>
         /// Get a ressource to endpoint.
@@ -69,5 +101,14 @@ namespace FluffRest.Client
         /// <param name="cancellationToken">Cancellation token to be forwarded.</param>
         /// <returns></returns>
         Task<T> ExecAsync<T>(HttpRequestMessage buildedMessage, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Excute a builded request asyncronously.
+        /// </summary>
+        /// <typeparam name="T">Type for automatic json deserialization.</typeparam>
+        /// <param name="buildedMessage">Builded http message.</param>
+        /// <param name="cancellationToken">Cancellation token to be forwarded.</param>
+        /// <returns></returns>
+        Task ExecAsync(HttpRequestMessage buildedMessage, CancellationToken cancellationToken = default);
     }
 }

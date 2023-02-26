@@ -28,6 +28,13 @@ namespace FluffRestTest.Infra
             return mockHttp.ToHttpClient();
         }
 
+        public HttpClient GetMockedHeaderClient(string url, HttpMethod method, string name, string value, string content = null)
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.When(method, url).Respond(req => GenerateResponseIfHeaderExists(req, name, value, content));
+            return mockHttp.ToHttpClient();
+        }
+
         public TestUserDto GetBasicDto()
         {
             return new TestUserDto()
@@ -35,6 +42,27 @@ namespace FluffRestTest.Infra
                 Id = 1,
                 Name = "Test",
             };
+        }
+
+        private HttpResponseMessage GenerateResponseIfHeaderExists(HttpRequestMessage req, string headerName, string headerValue, string content = null)
+        {
+            if (req.Headers.Any(x => x.Key == headerName && x.Value.Contains(headerValue)))
+            {
+                if (string.IsNullOrEmpty(content))
+                {
+                    return new HttpResponseMessage(System.Net.HttpStatusCode.OK);
+                }
+                else
+                {
+                    var response = new HttpResponseMessage(System.Net.HttpStatusCode.OK);
+                    response.Content = new StringContent(content);
+                    return response;
+                }                
+            }
+            else
+            {
+                return new HttpResponseMessage(System.Net.HttpStatusCode.BadRequest);
+            }
         }
     }
 }
