@@ -1,4 +1,5 @@
-﻿using FluffRest.Request;
+﻿using FluffRest.Listener;
+using FluffRest.Request;
 using FluffRest.Settings;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -49,6 +50,22 @@ namespace FluffRest.Client
         /// <returns></returns>
         /// <exception cref="Exception.FluffDuplicateParameterException">Will throw if authentication is already set.</exception>
         IFluffRestClient AddBearerAuth(string token);
+
+        /// <summary>
+        /// Create the Authorization header using custom scheme that will be sent with all request made by this client.
+        /// </summary>
+        /// <param name="scheme">Auth scheme to use.</param>
+        /// <param name="value">Auth value to send</param>
+        /// <returns></returns>
+        /// <exception cref="Exception.FluffDuplicateParameterException">Will throw if authentication is already set.</exception>
+        IFluffRestClient AddAuth(string scheme, string value);
+
+        /// <summary>
+        /// Register a listner to this client.
+        /// </summary>
+        /// <param name="listener">Listner that will receive instructions.</param>
+        /// <returns></returns>
+        IFluffRestClient RegisterListener(IFluffListener listener);
 
         /// <summary>
         /// Get a ressource to endpoint.
@@ -110,5 +127,13 @@ namespace FluffRest.Client
         /// <param name="cancellationToken">Cancellation token to be forwarded.</param>
         /// <returns></returns>
         Task ExecAsync(HttpRequestMessage buildedMessage, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Get and cancel previously allocated cancellation token for this key.
+        /// Do not call this method direclty, call method on request configuration.
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        CancellationToken GetCancellationFromKey(string key);
     }
 }

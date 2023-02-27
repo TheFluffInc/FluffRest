@@ -28,10 +28,27 @@ namespace FluffRestTest.Infra
             return mockHttp.ToHttpClient();
         }
 
+        public HttpClient GetMockedClient(string url, HttpMethod method)
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.When(method, url).Respond(req => new HttpResponseMessage()
+            {
+                StatusCode = System.Net.HttpStatusCode.OK
+            });
+            return mockHttp.ToHttpClient();
+        }
+
         public HttpClient GetMockedHeaderClient(string url, HttpMethod method, string name, string value, string content = null)
         {
             var mockHttp = new MockHttpMessageHandler();
             mockHttp.When(method, url).Respond(req => GenerateResponseIfHeaderExists(req, name, value, content));
+            return mockHttp.ToHttpClient();
+        }
+
+        public HttpClient GetMockedBodyClient(string url, HttpMethod method, string body)
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.When(method, url).Respond(req => GenerateResponseIfBodyExistsAsync(req, body));
             return mockHttp.ToHttpClient();
         }
 
@@ -58,6 +75,20 @@ namespace FluffRestTest.Infra
                     response.Content = new StringContent(content);
                     return response;
                 }                
+            }
+            else
+            {
+                return new HttpResponseMessage(System.Net.HttpStatusCode.BadRequest);
+            }
+        }
+
+        private async Task<HttpResponseMessage> GenerateResponseIfBodyExistsAsync(HttpRequestMessage req, string body)
+        {
+            var receivedBody = await req.Content.ReadAsStringAsync();
+
+            if (receivedBody == body)
+            {
+                return new HttpResponseMessage(System.Net.HttpStatusCode.OK);
             }
             else
             {

@@ -42,5 +42,21 @@ namespace FluffRestTest.Tests
             // Act
             await fluffClient.Get("auth").ExecAsync();
         }
+
+        [TestMethod]
+        public async Task TestAddCustomAuthRequest()
+        {
+            // Arrange
+
+            var url = $"{TestUrl}/auth";
+            var scheme = "Test";
+            var value = "Auth";
+            var httpClient = GetMockedHeaderClient(url, HttpMethod.Get, "Authorization", $"{scheme} {value}");
+            IFluffRestClient fluffClient = new FluffRestClient(TestUrl, httpClient);
+            fluffClient = fluffClient.AddAuth(scheme, value);
+
+            // Act
+            await fluffClient.Get("auth").ExecAsync();
+        }
     }
 }
