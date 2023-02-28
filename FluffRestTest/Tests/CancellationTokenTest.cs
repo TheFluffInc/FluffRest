@@ -1,5 +1,6 @@
 ﻿using FluffRest.Client;
 using FluffRestTest.Infra;
+using FluffRestTest.Mocks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,7 +29,7 @@ namespace FluffRestTest.Tests
         }
 
         [TestMethod]
-        public void TestCancellationTokenProvided()
+        public void TestCancellationTokenProvidedByClient()
         {
             var http = GetMockedClient(TestUrl, HttpMethod.Get);
             var client = new FluffRestClient(TestUrl, http);
@@ -52,6 +53,22 @@ namespace FluffRestTest.Tests
             tokenSource.Cancel();
 
             await client.Get(TestUrl).WithAutoCancellation().ExecAsync(tokenSource.Token);
+        }
+
+        [TestMethod]
+        public async Task TestGoodCancellationTokenProvidedAsync()
+        {
+            var url = $"{TestUrl}/cancel";
+            var http = GetMockedClient(url, HttpMethod.Get);
+            IFluffRestClient client = new FluffRestClient(TestUrl, http);
+            var intercepter = new MockInterceptCancellationTokenListener();
+            client = client.RegisterListener(intercepter);
+            await client.Get("cancel").WithAutoCancellation().ExecAsync();
+
+            var cancellationOfRequest = intercepter.Token;
+            await client.Get("cancel").WithAutoCancellation().ExecAsync();
+
+            Assert.IsTrue(cancellationOfRequest.IsCancellationRequested);
         }
     }
 }
