@@ -1,9 +1,13 @@
 ﻿using FluffRest.Client;
 using FluffRest.Exception;
+using FluffRest.Settings;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Runtime;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -16,13 +20,20 @@ namespace FluffRest.Request
         private readonly HttpMethod _method;
         private readonly string _route;
         private readonly Dictionary<string, string> _parameters;
+        private readonly Dictionary<string, string> _headers;
+        private object _body;
+        private Type _bodyType;
+        private string _cancellationKey;
 
-        internal FluffRequest(IFluffRestClient client, HttpMethod method, string route)
+        internal FluffRequest(IFluffRestClient client, HttpMethod method, string route, string cancellationKey = null)
         {
             _client = client;
             _method = method;
             _route = route;
             _parameters = new Dictionary<string, string>();
+            _headers = new Dictionary<string, string>();
+            _body = null;
+            _cancellationKey = cancellationKey;
         }
 
         #region Query Parameters
@@ -65,21 +76,122 @@ namespace FluffRest.Request
 
         #endregion
 
-        #region Exceution
+        #region Headers
+
+        public IFluffRequest AddHeader(string key, string value)
+        {
+            if (!_headers.ContainsKey(key))
+            {
+                _headers.Add(key, value);
+            }
+            else
+            {
+                if (_client.Settings.DuplicateHeaderHandling == FluffDuplicateHeaderHandling.Throw)
+                {
+                    throw new FluffDuplicateParameterException($"Duplicate default header with key '{key}'");
+                }
+                else if (_client.Settings.DuplicateHeaderHandling == FluffDuplicateHeaderHandling.Replace)
+                {
+                    _headers[key] = value;
+                }
+            }
+
+            return this;
+        }
+
+        #endregion
+
+        #region Body
+
+        public IFluffRequest AddBody<T>(T body)
+        {
+            _body = body;
+            _bodyType = typeof(T);
+            return this;
+        }
+
+        #endregion
+
+        #region Cancellation Token
+
+        public IFluffRequest WithAutoCancellation(string cancellationKey = "default")
+        {
+            _cancellationKey = cancellationKey;
+            return this;
+        }
+
+        public bool IsAutoCancellationConfigured()
+        {
+            return !string.IsNullOrEmpty(_cancellationKey);
+        }
+
+        #endregion
+
+        #region Execution
 
         public Task<T> ExecAsync<T>(CancellationToken cancellationToken = default)
         {
-            return _client.ExecAsync<T>(BuildRequest(), cancellationToken);
+            return _client.ExecAsync<T>(BuildRequest("application/json"), GetCancellationFromKeyOrProvidedOne(cancellationToken));
         }
 
+        public Task ExecAsync(CancellationToken cancellationToken = default)
+        {
+            return _client.ExecAsync(BuildRequest(), GetCancellationFromKeyOrProvidedOne(cancellationToken));
+        }
 
         #endregion
 
         #region Private
 
-        private HttpRequestMessage BuildRequest()
+        private HttpRequestMessage BuildRequest(string accept = null)
         {
             HttpRequestMessage request = new HttpRequestMessage(_method, BuildRequestUrl());
+
+            if (_client.DefaultHeaders.Any())
+            {
+                for (int i = 0; i < _client.DefaultHeaders.Count; i++)
+                {
+                    var header = _client.DefaultHeaders.ElementAt(i);
+                    request.Headers.Add(header.Key, header.Value);
+                }
+            }
+
+            if (_headers.Any())
+            {
+                for (int i = 0; i < _headers.Count; i++)
+                {
+                    var header = _headers.ElementAt(i);
+
+                    if (request.Headers.Any(x => x.Key == header.Key))
+                    {
+                        if (_client.Settings.DuplicateDefaultHeaderHandling == FluffDuplicateWithDefaultHeaderHandling.Throw)
+                        {
+                            throw new FluffDuplicateParameterException($"Conflicting request header with default one '{header.Key}', fix it or configure client to change this behavior.");
+                        }
+                        else if (_client.Settings.DuplicateDefaultHeaderHandling == FluffDuplicateWithDefaultHeaderHandling.Replace)
+                        {
+                            request.Headers.Remove(header.Key);
+                            request.Headers.Add(header.Key, header.Value);
+                        }
+                    }
+                    else
+                    {
+                        request.Headers.Add(header.Key, header.Value);
+                    }
+                }
+            }
+
+            if (!string.IsNullOrEmpty(accept) && !request.Headers.Any(x => x.Key == "Accept"))
+            {
+                request.Headers.Add("Accept", accept);
+            }
+
+            if (_body != null)
+            {
+                var json = JsonSerializer.Serialize(_body, _bodyType);
+                request.Content = new StringContent(json, Encoding.UTF8, "application/json");
+            }
+
             return request;
         }
 
@@ -109,6 +221,20 @@ namespace FluffRest.Request
             }
 
             return finalUrl.ToString();
+        }
+
+        private CancellationToken GetCancellationFromKeyOrProvidedOne(CancellationToken providedToken)
+        {
+            if (providedToken != default)
+            {
+                return providedToken;
+            }
+            else if (!string.IsNullOrEmpty(_cancellationKey))
+            {
+                return _client.GetCancellationFromKey(_cancellationKey);
+            }
+
+            return default;
         }
 
         #endregion

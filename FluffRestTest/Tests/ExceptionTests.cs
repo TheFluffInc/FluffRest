@@ -17,7 +17,7 @@ namespace FluffRestTest.Tests
     public class ExceptionTests : BaseTest
     {
         [TestMethod]
-        public async Task TestErrorContentForwarded()
+        public async Task TestErrorContentForwardedWithJson()
         {
             // Arrange
 
@@ -35,6 +35,39 @@ namespace FluffRestTest.Tests
                 // Act
 
                 var result = await fluffClient.Get("error").ExecAsync<TestUserDto>();
+            }
+            catch (FluffRequestException ex)
+            {
+                Assert.IsNotNull(ex.Content);
+
+                var jsonResult = JsonConvert.DeserializeObject<TestUserDto>(ex.Content);
+
+                // Assert
+                Assert.IsNotNull(jsonResult);
+                Assert.AreEqual(jsonResult.Id, dto.Id);
+                Assert.AreEqual(jsonResult.Name, dto.Name);
+            }
+        }
+
+        [TestMethod]
+        public async Task TestErrorContentForwardedWithoutJson()
+        {
+            // Arrange
+
+            var dto = GetBasicDto();
+            var url = $"{TestUrl}/error";
+            var json = System.Text.Json.JsonSerializer.Serialize(dto);
+            var mockResponse = new HttpResponseMessage(System.Net.HttpStatusCode.InternalServerError);
+            mockResponse.Content = new StringContent(json);
+            var httpClient = GetMockedClient(url, mockResponse, HttpMethod.Get);
+            var fluffClient = new FluffRestClient(TestUrl, httpClient);
+
+
+            try
+            {
+                // Act
+
+                await fluffClient.Get("error").ExecAsync();
             }
             catch (FluffRequestException ex)
             {
