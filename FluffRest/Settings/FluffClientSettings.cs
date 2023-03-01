@@ -5,6 +5,7 @@
         public FluffDuplicateParameterKeyHandling DuplicateParameterKeyHandling { get; private set; }
         public FluffDuplicateHeaderHandling DuplicateHeaderHandling { get; private set; }
         public FluffDuplicateWithDefaultHeaderHandling DuplicateDefaultHeaderHandling { get; private set; }
+        public FluffAutoCancelHandling AutoCancelHandling { get; private set; }
         public bool EnsureSuccessCode { get; private set; }
 
         /// <summary>
@@ -18,12 +19,14 @@
             FluffDuplicateParameterKeyHandling duplicateHandling = default, 
             bool ensureSuccessCode = true, 
             FluffDuplicateWithDefaultHeaderHandling duplicateDefaultHeaderHandling = default, 
-            FluffDuplicateHeaderHandling duplicateHeaderHandling = default)
+            FluffDuplicateHeaderHandling duplicateHeaderHandling = default,
+            FluffAutoCancelHandling autoCancelHandling = default)
         {
             DuplicateParameterKeyHandling = duplicateHandling;
             EnsureSuccessCode = ensureSuccessCode;
             DuplicateDefaultHeaderHandling = duplicateDefaultHeaderHandling;
             DuplicateHeaderHandling = duplicateHeaderHandling;
+            AutoCancelHandling = autoCancelHandling;
         }
     }
 }

@@ -68,6 +68,17 @@ namespace FluffRest.Client
         IFluffRestClient RegisterListener(IFluffListener listener);
 
         /// <summary>
+        /// Make all requests use an automatic cancellation of request. Configure which tokens are sent to the requests by editing the settings <see cref="FluffClientSettings"/>
+        /// </summary>
+        /// <returns></returns>
+        IFluffRestClient WithAutoCancellation();
+
+        /// <summary>
+        /// Cancell all requests made with the client.
+        /// </summary>
+        void CancellAllRequests();
+
+        /// <summary>
         /// Get a ressource to endpoint.
         /// </summary>
         /// <param name="route">Route segment to endpoint excluding base url.</param>

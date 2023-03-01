@@ -20,6 +20,7 @@ namespace FluffRest.Client
         private readonly Dictionary<string, string> _defaultHeaders;
         private List<IFluffListener> _listeners;
         private Dictionary<string, CancellationTokenSource> _cancellationTokens;
+        private bool _useAutoCancel;
 
         /// <summary>
         /// Create a new rest client, using an existing HttpClient. It can be configured via the <see cref="FluffClientSettings"/> object.
@@ -36,6 +37,7 @@ namespace FluffRest.Client
             _defaultHeaders = new Dictionary<string, string>();
             _listeners = new List<IFluffListener>();
             _cancellationTokens = new Dictionary<string, CancellationTokenSource>();
+            _useAutoCancel = false;
         }
 
         public string BaseUrl => _baseUrl;
@@ -119,7 +121,21 @@ namespace FluffRest.Client
 
         public IFluffRequest Request(HttpMethod method, string route)
         {
-            return new FluffRequest(this, method, route);
+            string cancellationKey = null;
+
+            if (_useAutoCancel)
+            {
+                if (_settings.AutoCancelHandling == FluffAutoCancelHandling.PerEndpoint)
+                {
+                    cancellationKey = route;
+                }
+                else if (_settings.AutoCancelHandling == FluffAutoCancelHandling.PerClient)
+                {
+                    cancellationKey = "default";
+                }
+            }
+
+            return new FluffRequest(this, method, route, cancellationKey);
         }
 
         #endregion
@@ -135,6 +151,26 @@ namespace FluffRest.Client
         #endregion
 
         #region Cancellation Token
+
+        public IFluffRestClient WithAutoCancellation()
+        {
+            _useAutoCancel = true;
+            return this;
+        }
+
+        public void CancellAllRequests()
+        {
+            if (_cancellationTokens.Any())
+            {
+                for (int i = 0; i < _cancellationTokens.Count; i++)
+                {
+                    var token = _cancellationTokens.ElementAt(i);
+                    token.Value.Cancel();
+                }
+            }
+
+            _cancellationTokens.Clear();
+        }
 
         public CancellationToken GetCancellationFromKey(string key)
         {

@@ -25,7 +25,7 @@ namespace FluffRest.Request
         private Type _bodyType;
         private string _cancellationKey;
 
-        internal FluffRequest(IFluffRestClient client, HttpMethod method, string route)
+        internal FluffRequest(IFluffRestClient client, HttpMethod method, string route, string cancellationKey = null)
         {
             _client = client;
             _method = method;
@@ -33,6 +33,7 @@ namespace FluffRest.Request
             _parameters = new Dictionary<string, string>();
             _headers = new Dictionary<string, string>();
             _body = null;
+            _cancellationKey = cancellationKey;
         }
 
         #region Query Parameters
