@@ -1,11 +1,13 @@
 ﻿using FluffRest.Client;
 using FluffRest.Exception;
 using FluffRest.Settings;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Runtime;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -19,14 +21,19 @@ namespace FluffRest.Request
         private readonly string _route;
         private readonly Dictionary<string, string> _parameters;
         private readonly Dictionary<string, string> _headers;
+        private object _body;
+        private Type _bodyType;
+        private string _cancellationKey;
 
-        internal FluffRequest(IFluffRestClient client, HttpMethod method, string route)
+        internal FluffRequest(IFluffRestClient client, HttpMethod method, string route, string cancellationKey = null)
         {
             _client = client;
             _method = method;
             _route = route;
             _parameters = new Dictionary<string, string>();
             _headers = new Dictionary<string, string>();
+            _body = null;
+            _cancellationKey = cancellationKey;
         }
 
         #region Query Parameters
@@ -94,16 +101,42 @@ namespace FluffRest.Request
 
         #endregion
 
+        #region Body
+
+        public IFluffRequest AddBody<T>(T body)
+        {
+            _body = body;
+            _bodyType = typeof(T);
+            return this;
+        }
+
+        #endregion
+
+        #region Cancellation Token
+
+        public IFluffRequest WithAutoCancellation(string cancellationKey = "default")
+        {
+            _cancellationKey = cancellationKey;
+            return this;
+        }
+
+        public bool IsAutoCancellationConfigured()
+        {
+            return !string.IsNullOrEmpty(_cancellationKey);
+        }
+
+        #endregion
+
         #region Execution
 
         public Task<T> ExecAsync<T>(CancellationToken cancellationToken = default)
         {
-            return _client.ExecAsync<T>(BuildRequest("application/json"), cancellationToken);
+            return _client.ExecAsync<T>(BuildRequest("application/json"), GetCancellationFromKeyOrProvidedOne(cancellationToken));
         }
 
         public Task ExecAsync(CancellationToken cancellationToken = default)
         {
-            return _client.ExecAsync(BuildRequest(), cancellationToken);
+            return _client.ExecAsync(BuildRequest(), GetCancellationFromKeyOrProvidedOne(cancellationToken));
         }
 
         #endregion
@@ -153,6 +186,12 @@ namespace FluffRest.Request
                 request.Headers.Add("Accept", accept);
             }
 
+            if (_body != null)
+            {
+                var json = JsonSerializer.Serialize(_body, _bodyType);
+                request.Content = new StringContent(json, Encoding.UTF8, "application/json");
+            }
+
             return request;
         }
 
@@ -182,6 +221,20 @@ namespace FluffRest.Request
             }
 
             return finalUrl.ToString();
+        }
+
+        private CancellationToken GetCancellationFromKeyOrProvidedOne(CancellationToken providedToken)
+        {
+            if (providedToken != default)
+            {
+                return providedToken;
+            }
+            else if (!string.IsNullOrEmpty(_cancellationKey))
+            {
+                return _client.GetCancellationFromKey(_cancellationKey);
+            }
+
+            return default;
         }
 
         #endregion

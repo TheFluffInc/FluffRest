@@ -1,7 +1,9 @@
 ﻿using FluffRest.Exception;
+using FluffRest.Listener;
 using FluffRest.Request;
 using FluffRest.Settings;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading;
@@ -16,6 +18,9 @@ namespace FluffRest.Client
         private readonly HttpClient _httpClient;
         private readonly FluffClientSettings _settings;
         private readonly Dictionary<string, string> _defaultHeaders;
+        private List<IFluffListener> _listeners;
+        private Dictionary<string, CancellationTokenSource> _cancellationTokens;
+        private bool _useAutoCancel;
 
         /// <summary>
         /// Create a new rest client, using an existing HttpClient. It can be configured via the <see cref="FluffClientSettings"/> object.
@@ -30,6 +35,9 @@ namespace FluffRest.Client
             _httpClient = httpClient ?? throw new System.ArgumentException($"{nameof(httpClient)} is null, please provide a http client");
             _settings = settings ?? new FluffClientSettings();
             _defaultHeaders = new Dictionary<string, string>();
+            _listeners = new List<IFluffListener>();
+            _cancellationTokens = new Dictionary<string, CancellationTokenSource>();
+            _useAutoCancel = false;
         }
 
         public string BaseUrl => _baseUrl;
@@ -76,6 +84,12 @@ namespace FluffRest.Client
             return this;
         }
 
+        public IFluffRestClient AddAuth(string scheme, string value)
+        {
+            var authHeader = $"{scheme} {value}";
+            return AddDefaultHeader(AuthorizationHeader, authHeader);
+        }
+
         #endregion
 
         #region Request
@@ -107,7 +121,69 @@ namespace FluffRest.Client
 
         public IFluffRequest Request(HttpMethod method, string route)
         {
-            return new FluffRequest(this, method, route);
+            string cancellationKey = null;
+
+            if (_useAutoCancel)
+            {
+                if (_settings.AutoCancelHandling == FluffAutoCancelHandling.PerEndpoint)
+                {
+                    cancellationKey = route;
+                }
+                else if (_settings.AutoCancelHandling == FluffAutoCancelHandling.PerClient)
+                {
+                    cancellationKey = "default";
+                }
+            }
+
+            return new FluffRequest(this, method, route, cancellationKey);
+        }
+
+        #endregion
+
+        #region Listener
+
+        public IFluffRestClient RegisterListener(IFluffListener listener)
+        {
+            _listeners.Add(listener);
+            return this;
+        }
+
+        #endregion
+
+        #region Cancellation Token
+
+        public IFluffRestClient WithAutoCancellation()
+        {
+            _useAutoCancel = true;
+            return this;
+        }
+
+        public void CancellAllRequests()
+        {
+            if (_cancellationTokens.Any())
+            {
+                for (int i = 0; i < _cancellationTokens.Count; i++)
+                {
+                    var token = _cancellationTokens.ElementAt(i);
+                    token.Value.Cancel();
+                }
+            }
+
+            _cancellationTokens.Clear();
+        }
+
+        public CancellationToken GetCancellationFromKey(string key)
+        {
+            if (_cancellationTokens.ContainsKey(key))
+            {
+                var tokenSource = _cancellationTokens[key];
+                tokenSource.Cancel();
+                _cancellationTokens.Remove(key);
+            }
+
+            var newTokenSource = new CancellationTokenSource();
+            _cancellationTokens.Add(key, newTokenSource);
+            return newTokenSource.Token;
         }
 
         #endregion
@@ -120,12 +196,15 @@ namespace FluffRest.Client
 
             try
             {
+                buildedMessage = await CallBeforeSendListenersAsync(buildedMessage, cancellationToken);
                 result = await _httpClient.SendAsync(buildedMessage, cancellationToken);
 
                 if (_settings.EnsureSuccessCode)
                 {
                     result.EnsureSuccessStatusCode();
                 }
+
+                await CallAfterRequestListenersAsync(result, cancellationToken);
 
                 var contentStream = await result.Content.ReadAsStreamAsync();
                 T objectResult = await JsonSerializer.DeserializeAsync<T>(contentStream, cancellationToken: cancellationToken);
@@ -134,6 +213,7 @@ namespace FluffRest.Client
             }
             catch (HttpRequestException httpEx)
             {
+                await CallRequestFailedListenersAsync(result, cancellationToken);
                 var stringContent = await result.Content.ReadAsStringAsync();
                 throw new FluffRequestException("Unhandled exception occured during processing of request", stringContent, httpEx);
             }
@@ -145,17 +225,60 @@ namespace FluffRest.Client
 
             try
             {
+                buildedMessage = await CallBeforeSendListenersAsync(buildedMessage, cancellationToken);
                 result = await _httpClient.SendAsync(buildedMessage, cancellationToken);
 
                 if (_settings.EnsureSuccessCode)
                 {
                     result.EnsureSuccessStatusCode();
                 }
+
+                await CallAfterRequestListenersAsync(result, cancellationToken);
             }
             catch (HttpRequestException httpEx)
             {
+                await CallRequestFailedListenersAsync(result, cancellationToken);
                 var stringContent = await result.Content.ReadAsStringAsync();
                 throw new FluffRequestException("Unhandled exception occured during processing of request", stringContent, httpEx);
+            }
+        }
+
+        #endregion
+
+        #region Private
+
+        private async Task<HttpRequestMessage> CallBeforeSendListenersAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            if (_listeners.Any())
+            {
+                for (int i = 0; i < _listeners.Count(); i++)
+                {
+                    request = await _listeners.ElementAt(i).OnRequestSentAsync(request, cancellationToken);
+                }
+            }
+
+            return request;
+        }
+
+        private async Task CallAfterRequestListenersAsync(HttpResponseMessage httpResponseMessage, CancellationToken cancellationToken)
+        {
+            if (_listeners.Any())
+            {
+                for (int i = 0; i < _listeners.Count(); i++)
+                {
+                    await _listeners.ElementAt(i).OnRequestReceivedAsync(httpResponseMessage, cancellationToken);
+                }
+            }
+        }
+
+        private async Task CallRequestFailedListenersAsync(HttpResponseMessage httpResponseMessage, CancellationToken cancellationToken)
+        {
+            if (_listeners.Any())
+            {
+                for (int i = 0; i < _listeners.Count(); i++)
+                {
+                    await _listeners.ElementAt(i).OnRequestHttpFailedAsync(httpResponseMessage, cancellationToken);
+                }
             }
         }
 

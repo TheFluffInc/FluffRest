@@ -9,14 +9,14 @@ namespace FluffRest.Request
         /// Execute the request and automatically perform json deserialization.
         /// </summary>
         /// <typeparam name="T">Type to map json received.</typeparam>
-        /// <param name="cancellationToken">Cancellation token to forward.</param>
+        /// <param name="cancellationToken">Cancellation token to forward, setting this will override configured auto cancellation.</param>
         /// <returns>Deserilized response from api.</returns>
         Task<T> ExecAsync<T>(CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Execute the request.
         /// </summary>
-        /// <param name="cancellationToken">Cancellation token to forward.</param>
+        /// <param name="cancellationToken">Cancellation token to forward, setting this will override configured auto cancellation.</param>
         /// <returns></returns>
         Task ExecAsync(CancellationToken cancellationToken = default);
 
@@ -64,5 +64,26 @@ namespace FluffRest.Request
         /// <returns>Request configured with this parameter.</returns>
         /// <exception cref="Exception.FluffDuplicateParameterException">Depending of the configuration of the client, duplicate keys will throw or have different behaviour, configure <see cref="Settings.FluffClientSettings"/> to override default settings.</exception>
         IFluffRequest AddQueryParameter(string key, long value);
+
+        /// <summary>
+        /// Add a json body in the request from a object that will be serialized into json.
+        /// </summary>
+        /// <typeparam name="T">Type for json serialization.</typeparam>
+        /// <param name="body">Object to be serialized.</param>
+        /// <returns></returns>
+        IFluffRequest AddBody<T>(T body);
+
+        /// <summary>
+        /// Configure this request to cancell if another request is made using this client.
+        /// </summary>
+        /// <param name="cancellationKey">You can specify a 'key' that will be use to separate different excution to allow dictincts cancellation for parrallel tasks.</param>
+        /// <returns></returns>
+        IFluffRequest WithAutoCancellation(string cancellationKey = "default");
+
+        /// <summary>
+        /// Tells you if this request has a cancellation token configured or not.
+        /// </summary>
+        /// <returns>Is auto cancel of old request enabled?</returns>
+        bool IsAutoCancellationConfigured();
     }
 }
