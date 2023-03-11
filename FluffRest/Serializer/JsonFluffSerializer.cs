@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -23,13 +24,11 @@ namespace FluffRest.Serializer
             return result;
         }
 
-        public Task<string> SerializeAsync<T>(T value, CancellationToken cancellationToken)
+        public async Task<string> SerializeAsync<T>(T value, CancellationToken cancellationToken)
         {
-            Stream jsonStream = new MemoryStream();
-            JsonSerializer.SerializeAsync(jsonStream, value, typeof(T), _jsonOptions, cancellationToken);
-
-            using var reader = new StreamReader(jsonStream);
-            return reader.ReadToEndAsync();
+            MemoryStream jsonStream = new MemoryStream();
+            await JsonSerializer.SerializeAsync(jsonStream, value, typeof(T), _jsonOptions, cancellationToken);
+            return Encoding.UTF8.GetString(jsonStream.ToArray());
         }
     }
 }
