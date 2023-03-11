@@ -1,6 +1,7 @@
 ﻿using FluffRest.Exception;
 using FluffRest.Listener;
 using FluffRest.Request;
+using FluffRest.Serializer;
 using FluffRest.Settings;
 using System;
 using System.Collections.Generic;
@@ -19,6 +20,7 @@ namespace FluffRest.Client
         private readonly HttpClient _httpClient;
         private readonly FluffClientSettings _settings;
         private readonly Dictionary<string, string> _defaultHeaders;
+        private readonly IFluffSerializer _serializer;
         private List<IFluffListener> _listeners;
         private Dictionary<string, CancellationTokenSource> _cancellationTokens;
         private bool _useAutoCancel;
@@ -31,7 +33,7 @@ namespace FluffRest.Client
         /// <param name="httpClient">HttpClient from your app</param>
         /// <param name="settings">Optional settings for deep configuration see <see cref="FluffClientSettings"/> object</param>
         /// <exception cref="System.ArgumentException">If the base url is null or empty or if the http client is null</exception>
-        public FluffRestClient(string baseUrl, HttpClient httpClient, FluffClientSettings settings = null)
+        public FluffRestClient(string baseUrl, HttpClient httpClient, FluffClientSettings settings = null, IFluffSerializer serializer = null)
         {
             _baseUrl = !string.IsNullOrEmpty(baseUrl) ? baseUrl : throw new System.ArgumentException($"{nameof(baseUrl)} is null or empty, please provide a base url for api calls");
             _httpClient = httpClient ?? throw new System.ArgumentException($"{nameof(httpClient)} is null, please provide a http client");
@@ -40,6 +42,7 @@ namespace FluffRest.Client
             _listeners = new List<IFluffListener>();
             _cancellationTokens = new Dictionary<string, CancellationTokenSource>();
             _useAutoCancel = false;
+            _serializer = serializer ?? new JsonFluffSerializer(new JsonSerializerOptions(JsonSerializerDefaults.Web));
         }
 
         public string BaseUrl => _baseUrl;
@@ -47,6 +50,8 @@ namespace FluffRest.Client
         public FluffClientSettings Settings => _settings;
 
         public Dictionary<string, string> DefaultHeaders => _defaultHeaders;
+
+        public IFluffSerializer Serializer => _serializer;
 
         #region Default Headers & Auth
 
@@ -210,7 +215,7 @@ namespace FluffRest.Client
                 await CallAfterRequestListenersAsync(result, cancellationToken);
 
                 var contentStream = await result.Content.ReadAsStreamAsync();
-                T objectResult = await JsonSerializer.DeserializeAsync<T>(contentStream, cancellationToken: cancellationToken);
+                T objectResult = await _serializer.DeserializeAsync<T>(contentStream, cancellationToken);
 
                 return objectResult;
             }
@@ -218,7 +223,7 @@ namespace FluffRest.Client
             {
                 await CallRequestFailedListenersAsync(result, cancellationToken);
                 var stringContent = await result.Content.ReadAsStringAsync();
-                throw new FluffRequestException("Unhandled exception occured during processing of request", stringContent, httpEx);
+                throw new FluffRequestException("Unhandled exception occured during processing of request", stringContent, result.StatusCode, httpEx);
             }
         }
 
@@ -242,7 +247,33 @@ namespace FluffRest.Client
             {
                 await CallRequestFailedListenersAsync(result, cancellationToken);
                 var stringContent = await result.Content.ReadAsStringAsync();
-                throw new FluffRequestException("Unhandled exception occured during processing of request", stringContent, httpEx);
+                throw new FluffRequestException("Unhandled exception occured during processing of request", stringContent, result.StatusCode, httpEx);
+            }
+        }
+
+        public async Task<string> ExecStringAsync(HttpRequestMessage buildedMessage, CancellationToken cancellationToken = default)
+        {
+            HttpResponseMessage result = null;
+
+            try
+            {
+                buildedMessage = await CallBeforeSendListenersAsync(buildedMessage, cancellationToken);
+                result = await _httpClient.SendAsync(buildedMessage, cancellationToken);
+
+                if (_settings.EnsureSuccessCode)
+                {
+                    result.EnsureSuccessStatusCode();
+                }
+
+                await CallAfterRequestListenersAsync(result, cancellationToken);
+                var contentString = await result.Content.ReadAsStringAsync();
+                return contentString;
+            }
+            catch (HttpRequestException httpEx)
+            {
+                await CallRequestFailedListenersAsync(result, cancellationToken);
+                var stringContent = await result.Content.ReadAsStringAsync();
+                throw new FluffRequestException("Unhandled exception occured during processing of request", stringContent, result.StatusCode, httpEx);
             }
         }
 

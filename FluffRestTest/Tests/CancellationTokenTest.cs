@@ -146,5 +146,22 @@ namespace FluffRestTest.Tests
             Assert.IsTrue(firstToken.IsCancellationRequested);
             Assert.IsFalse(secondToken.IsCancellationRequested);
         }
+
+        [TestMethod]
+        public void TestCancellAllRequestOnDispose()
+        {
+            var http = GetMockedClient(TestUrl, HttpMethod.Get);
+            var client = new FluffRestClient(TestUrl, http);
+
+            var token1 = client.GetCancellationFromKey("default");
+            var token2 = client.GetCancellationFromKey("2");
+            var token3 = client.GetCancellationFromKey("3");
+
+            client.Dispose();
+
+            Assert.IsTrue(token1.IsCancellationRequested);
+            Assert.IsTrue(token2.IsCancellationRequested);
+            Assert.IsTrue(token3.IsCancellationRequested);
+        }
     }
 }

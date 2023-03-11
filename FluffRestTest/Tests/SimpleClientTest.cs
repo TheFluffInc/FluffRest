@@ -132,6 +132,25 @@ namespace FluffRestTest.Tests
             Assert.AreEqual(result.Name, dto.Name);
         }
 
+        [TestMethod]
+        public async Task TestExcecuteBasicGetStringRequest()
+        {
+            // Arrange
+
+            var dto = GetBasicDto();
+            var url = $"{TestUrl}/simple";
+            var json = System.Text.Json.JsonSerializer.Serialize(dto);
+            var httpClient = GetMockedClient(url, JsonContentType, json, HttpMethod.Get);
+            var fluffClient = new FluffRestClient(TestUrl, httpClient);
+
+            // Act
+            var result = await fluffClient.Get("simple").ExecStringAsync();
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual(result, json);
+        }
+
         #region Other
 
         public static IEnumerable<object[]> GetHttpMethods()
