@@ -1,5 +1,6 @@
 ﻿using FluffRest.Listener;
 using FluffRest.Request;
+using FluffRest.Serializer;
 using FluffRest.Settings;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -19,6 +20,8 @@ namespace FluffRest.Client
         /// Settings to be used globally by requests. <see cref="FluffClientSettings"/>
         /// </summary>
         FluffClientSettings Settings { get; }
+
+        IFluffSerializer Serializer { get; }
 
         /// <summary>
         /// DO NOT TOUCH THIS, use method add default header
@@ -138,6 +141,14 @@ namespace FluffRest.Client
         /// <param name="cancellationToken">Cancellation token to be forwarded.</param>
         /// <returns></returns>
         Task ExecAsync(HttpRequestMessage buildedMessage, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Excute a builded request asyncronously.
+        /// </summary>
+        /// <param name="buildedMessage">Builded http message.</param>
+        /// <param name="cancellationToken">Cancellation token to be forwarded.</param>
+        /// <returns>Raw string result</returns>
+        Task<string> ExecStringAsync(HttpRequestMessage buildedMessage, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Get and cancel previously allocated cancellation token for this key.

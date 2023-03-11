@@ -21,6 +21,13 @@ namespace FluffRest.Request
         Task ExecAsync(CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// Execute the request and get raw string result.
+        /// </summary>
+        /// <param name="cancellationToken">Cancellation token to forward, setting this will override configured auto cancellation.</param>
+        /// <returns></returns>
+        Task<string> ExecStringAsync(CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// Add a header only to this request.
         /// </summary>
         /// <param name="key">Name of the header</param>

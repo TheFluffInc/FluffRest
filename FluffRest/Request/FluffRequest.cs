@@ -5,9 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Runtime;
 using System.Text;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -129,21 +127,29 @@ namespace FluffRest.Request
 
         #region Execution
 
-        public Task<T> ExecAsync<T>(CancellationToken cancellationToken = default)
+        public async Task<T> ExecAsync<T>(CancellationToken cancellationToken = default)
         {
-            return _client.ExecAsync<T>(BuildRequest("application/json"), GetCancellationFromKeyOrProvidedOne(cancellationToken));
+            var request = await BuildRequestAsync("application/json", cancellationToken);
+            return await _client.ExecAsync<T>(request, GetCancellationFromKeyOrProvidedOne(cancellationToken));
         }
 
-        public Task ExecAsync(CancellationToken cancellationToken = default)
+        public async Task ExecAsync(CancellationToken cancellationToken = default)
         {
-            return _client.ExecAsync(BuildRequest(), GetCancellationFromKeyOrProvidedOne(cancellationToken));
+            var request = await BuildRequestAsync(cancellationToken: cancellationToken);
+            await _client.ExecAsync(request, GetCancellationFromKeyOrProvidedOne(cancellationToken));
+        }
+
+        public async Task<string> ExecStringAsync(CancellationToken cancellationToken = default)
+        {
+            var request = await BuildRequestAsync(cancellationToken: cancellationToken);
+            return await _client.ExecStringAsync(request, GetCancellationFromKeyOrProvidedOne(cancellationToken));
         }
 
         #endregion
 
         #region Private
 
-        private HttpRequestMessage BuildRequest(string accept = null)
+        private async Task<HttpRequestMessage> BuildRequestAsync(string accept = null, CancellationToken cancellationToken = default)
         {
             HttpRequestMessage request = new HttpRequestMessage(_method, BuildRequestUrl());
 
@@ -188,7 +194,7 @@ namespace FluffRest.Request
 
             if (_body != null)
             {
-                var json = JsonSerializer.Serialize(_body, _bodyType);
+                var json = await _client.Serializer.SerializeAsync(_body, cancellationToken);
                 request.Content = new StringContent(json, Encoding.UTF8, "application/json");
             }
 
