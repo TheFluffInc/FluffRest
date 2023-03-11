@@ -3,7 +3,30 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <Nullable>disable</Nullable>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <PackageId>TheFluffInc.$(AssemblyName)</PackageId>
+    <Title>TheFluffInc Rest Client</Title>
+    <Authors>Asmoyed</Authors>
+    <Company>TheFluffInc</Company>
+    <Product>TheFluffInc.$(AssemblyName)</Product>
+    <Description>Simple Fluent .NET HTTP Client Wrapper.</Description>
+    <PackageProjectUrl>https://github.com/TheFluffInc/FluffRest</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/TheFluffInc/FluffRest</RepositoryUrl>
+    <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="System.Text.Json" Version="7.0.2" />
