@@ -22,7 +22,7 @@ namespace FluffRestTest.Tests
             var dto = GetBasicDto();
             var url = $"{TestUrl}/body";
             var serializer = new JsonFluffSerializer(new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
-            var json = await serializer.SerializeAsync(dto, CancellationToken.None);
+            var json = "{\"id\":1,\"name\":\"Test\"}";
             var httpClient = GetMockedBodyClient(url, HttpMethod.Post, json);
             IFluffRestClient fluffClient = new FluffRestClient(TestUrl, httpClient);
 
