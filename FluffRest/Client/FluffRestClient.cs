@@ -223,7 +223,7 @@ namespace FluffRest.Client
             {
                 await CallRequestFailedListenersAsync(result, cancellationToken);
                 var stringContent = await result.Content.ReadAsStringAsync();
-                throw new FluffRequestException("Unhandled exception occured during processing of request", stringContent, result.StatusCode, httpEx);
+                throw new FluffRequestException("Unhandled exception occured during processing of request", stringContent, result.StatusCode, _serializer, httpEx);
             }
         }
 
@@ -247,7 +247,7 @@ namespace FluffRest.Client
             {
                 await CallRequestFailedListenersAsync(result, cancellationToken);
                 var stringContent = await result.Content.ReadAsStringAsync();
-                throw new FluffRequestException("Unhandled exception occured during processing of request", stringContent, result.StatusCode, httpEx);
+                throw new FluffRequestException("Unhandled exception occured during processing of request", stringContent, result.StatusCode, _serializer, httpEx);
             }
         }
 
@@ -273,7 +273,7 @@ namespace FluffRest.Client
             {
                 await CallRequestFailedListenersAsync(result, cancellationToken);
                 var stringContent = await result.Content.ReadAsStringAsync();
-                throw new FluffRequestException("Unhandled exception occured during processing of request", stringContent, result.StatusCode, httpEx);
+                throw new FluffRequestException("Unhandled exception occured during processing of request", stringContent, result.StatusCode, _serializer, httpEx);
             }
         }
 
