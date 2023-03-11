@@ -2,6 +2,7 @@
 using FluffRest.Listener;
 using FluffRest.Request;
 using FluffRest.Settings;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -11,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace FluffRest.Client
 {
-    public class FluffRestClient : IFluffRestClient
+    public class FluffRestClient : IFluffRestClient, IDisposable
     {
         private const string AuthorizationHeader = "Authorization";
         private readonly string _baseUrl;
@@ -21,6 +22,7 @@ namespace FluffRest.Client
         private List<IFluffListener> _listeners;
         private Dictionary<string, CancellationTokenSource> _cancellationTokens;
         private bool _useAutoCancel;
+        private bool _disposedValue;
 
         /// <summary>
         /// Create a new rest client, using an existing HttpClient. It can be configured via the <see cref="FluffClientSettings"/> object.
@@ -166,6 +168,7 @@ namespace FluffRest.Client
                 {
                     var token = _cancellationTokens.ElementAt(i);
                     token.Value.Cancel();
+                    token.Value.Dispose();
                 }
             }
 
@@ -280,6 +283,25 @@ namespace FluffRest.Client
                     await _listeners.ElementAt(i).OnRequestHttpFailedAsync(httpResponseMessage, cancellationToken);
                 }
             }
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposedValue)
+            {
+                if (disposing)
+                {
+                    CancellAllRequests();
+                }
+
+                _disposedValue = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
 
         #endregion
