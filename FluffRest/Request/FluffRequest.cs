@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace FluffRest.Request
 {
@@ -215,9 +216,9 @@ namespace FluffRest.Request
                 for (int i = 0; i < _parameters.Count; i++)
                 {
                     var param = _parameters.ElementAt(i);
-                    finalUrl.Append(param.Key);
+                    finalUrl.Append(HttpUtility.UrlEncode(param.Key));
                     finalUrl.Append('=');
-                    finalUrl.Append(param.Value);
+                    finalUrl.Append(HttpUtility.UrlEncode(param.Value));
 
                     if (i < _parameters.Count - 1)
                     {
