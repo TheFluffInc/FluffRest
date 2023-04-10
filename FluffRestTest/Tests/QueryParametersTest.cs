@@ -41,6 +41,28 @@ namespace FluffRestTest.Tests
         }
 
         [TestMethod]
+        public async Task EscapedCharactersParameters()
+        {
+            // Arrange
+
+            var dto = GetBasicDto();
+            var url = $"{TestUrl}/escaped?+!%22%23%24%25%26%27()*%2b%2c-.%2f%40%5b%5d%5c%5e%60%7e=+!%22%23%24%25%26%27()*%2b%2c-.%2f%40%5b%5d%5c%5e%60%7e";
+            var json = System.Text.Json.JsonSerializer.Serialize(dto);
+            var httpClient = GetMockedClient(url, JsonContentType, json, HttpMethod.Get);
+            var fluffClient = new FluffRestClient(TestUrl, httpClient);
+
+            // Act
+            var result = await fluffClient.Get("escaped")
+                .AddQueryParameter(" !\"#$%&'()*+,-./@[]\\^`~", " !\"#$%&'()*+,-./@[]\\^`~")
+                .ExecAsync<TestUserDto>();
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual(result.Id, dto.Id);
+            Assert.AreEqual(result.Name, dto.Name);
+        }
+
+        [TestMethod]
         [ExpectedException(typeof(FluffDuplicateParameterException))]
         public async Task DuplicateParameterThrow()
         {
