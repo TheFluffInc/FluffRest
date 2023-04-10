@@ -39,8 +39,43 @@ namespace FluffRestTest.Tests
             catch (FluffRequestException ex)
             {
                 Assert.IsNotNull(ex.Content);
+                Assert.AreEqual(ex.StatusCode, System.Net.HttpStatusCode.InternalServerError);
 
-                var jsonResult = JsonConvert.DeserializeObject<TestUserDto>(ex.Content);
+                var jsonResult = await ex.DeserializeAsync<TestUserDto>();
+
+                // Assert
+                Assert.IsNotNull(jsonResult);
+                Assert.AreEqual(jsonResult.Id, dto.Id);
+                Assert.AreEqual(jsonResult.Name, dto.Name);
+            }
+        }
+
+        [TestMethod]
+        public async Task TestErrorContentForwardedWithJsonOnStringExecute()
+        {
+            // Arrange
+
+            var dto = GetBasicDto();
+            var url = $"{TestUrl}/error";
+            var json = System.Text.Json.JsonSerializer.Serialize(dto);
+            var mockResponse = new HttpResponseMessage(System.Net.HttpStatusCode.InternalServerError);
+            mockResponse.Content = new StringContent(json);
+            var httpClient = GetMockedClient(url, mockResponse, HttpMethod.Get);
+            var fluffClient = new FluffRestClient(TestUrl, httpClient);
+
+
+            try
+            {
+                // Act
+
+                await fluffClient.Get("error").ExecStringAsync();
+            }
+            catch (FluffRequestException ex)
+            {
+                Assert.IsNotNull(ex.Content);
+                Assert.AreEqual(ex.StatusCode, System.Net.HttpStatusCode.InternalServerError);
+
+                var jsonResult = await ex.DeserializeAsync<TestUserDto>();
 
                 // Assert
                 Assert.IsNotNull(jsonResult);
@@ -73,7 +108,7 @@ namespace FluffRestTest.Tests
             {
                 Assert.IsNotNull(ex.Content);
 
-                var jsonResult = JsonConvert.DeserializeObject<TestUserDto>(ex.Content);
+                var jsonResult = await ex.DeserializeAsync<TestUserDto>();
 
                 // Assert
                 Assert.IsNotNull(jsonResult);

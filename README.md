@@ -10,6 +10,8 @@
 * Easy header configuration.
 * Fully customizable pipeline with listeners that can change the behaviour as desired.
 * Automatic cancellation of requests that is configurable.
+* Fully customisable serialization with default JSON.
+* Easy deserialization on failed requests.
 
 ## Contributing
 
