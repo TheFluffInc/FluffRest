@@ -130,6 +130,7 @@ namespace FluffRestTest.Tests
             Assert.IsNotNull(result); 
             Assert.AreEqual(result.Id, dto.Id);
             Assert.AreEqual(result.Name, dto.Name);
+            Assert.AreEqual(result.Date, dto.Date);
         }
 
         [TestMethod]
