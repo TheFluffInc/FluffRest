@@ -21,7 +21,8 @@ namespace FluffRest.Request
         private readonly Dictionary<string, string> _parameters;
         private readonly Dictionary<string, string> _headers;
         private object _body;
-        private Type _bodyType;
+        private bool _isRawBody;
+        private string _rawBodyContentType;
         private string _cancellationKey;
 
         internal FluffRequest(IFluffRestClient client, HttpMethod method, string route, string cancellationKey = null)
@@ -104,8 +105,26 @@ namespace FluffRest.Request
 
         public IFluffRequest AddBody<T>(T body)
         {
+            if (_body != null)
+            {
+                throw new InvalidOperationException("You can only have one body per request");
+            }
+
             _body = body;
-            _bodyType = typeof(T);
+            _isRawBody = false;
+            return this;
+        }
+
+        public IFluffRequest AddBody(string rawBody, string contentType = "application/json")
+        {
+            if (_body != null)
+            {
+                throw new InvalidOperationException("You can only have one body per request");
+            }
+
+            _body = rawBody;
+            _rawBodyContentType = contentType;
+            _isRawBody = true;
             return this;
         }
 
@@ -195,8 +214,16 @@ namespace FluffRest.Request
 
             if (_body != null)
             {
-                var json = await _client.Serializer.SerializeAsync(_body, cancellationToken);
-                request.Content = new StringContent(json, Encoding.UTF8, "application/json");
+                if (_isRawBody)
+                {
+                    request.Content = new StringContent((string)_body, Encoding.UTF8, _rawBodyContentType);
+                }
+                else
+                {
+                    var json = await _client.Serializer.SerializeAsync(_body, cancellationToken);
+                    request.Content = new StringContent(json, Encoding.UTF8, "application/json");
+                }
+
             }
 
             return request;

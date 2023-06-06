@@ -52,12 +52,20 @@ namespace FluffRestTest.Infra
             return mockHttp.ToHttpClient();
         }
 
+        public HttpClient GetMockedBodyClientWithContentType(string url, HttpMethod method, string body, string contentType = null)
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.When(method, url).Respond(req => GenerateResponseIfBodyExistsAsync(req, body, contentType));
+            return mockHttp.ToHttpClient();
+        }
+
         public TestUserDto GetBasicDto()
         {
             return new TestUserDto()
             {
                 Id = 1,
                 Name = "Test",
+                Date = DateTime.UtcNow
             };
         }
 
@@ -74,7 +82,7 @@ namespace FluffRestTest.Infra
                     var response = new HttpResponseMessage(System.Net.HttpStatusCode.OK);
                     response.Content = new StringContent(content);
                     return response;
-                }                
+                }
             }
             else
             {
@@ -82,9 +90,14 @@ namespace FluffRestTest.Infra
             }
         }
 
-        private async Task<HttpResponseMessage> GenerateResponseIfBodyExistsAsync(HttpRequestMessage req, string body)
+        private async Task<HttpResponseMessage> GenerateResponseIfBodyExistsAsync(HttpRequestMessage req, string body, string contentType = null)
         {
             var receivedBody = await req.Content.ReadAsStringAsync();
+
+            if (!string.IsNullOrEmpty(contentType) && !req.Content.Headers.ContentType.MediaType.Equals(contentType))
+            {
+                return new HttpResponseMessage(System.Net.HttpStatusCode.UnsupportedMediaType);
+            }
 
             if (receivedBody == body)
             {
