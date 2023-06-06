@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using System.Threading;
+using System;
 
 namespace FluffRest.Request
 {
@@ -78,7 +79,16 @@ namespace FluffRest.Request
         /// <typeparam name="T">Type for json serialization.</typeparam>
         /// <param name="body">Object to be serialized.</param>
         /// <returns></returns>
+        /// <exception cref="InvalidOperationException">You can only have one body per request</exception>
         IFluffRequest AddBody<T>(T body);
+
+        /// <summary>
+        /// Add a raw string body in the request, it will not be parsed.
+        /// </summary>
+        /// <param name="rawBody">Body to be included.</param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException">You can only have one body per request</exception>
+        IFluffRequest AddBody(string rawBody, string contentType = "application/json");
 
         /// <summary>
         /// Configure this request to cancell if another request is made using this client.
