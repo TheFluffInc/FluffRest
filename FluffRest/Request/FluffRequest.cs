@@ -1,5 +1,6 @@
 ﻿using FluffRest.Client;
 using FluffRest.Exception;
+using FluffRest.Request.Advanced;
 using FluffRest.Settings;
 using System;
 using System.Collections.Generic;
@@ -163,6 +164,12 @@ namespace FluffRest.Request
         {
             var request = await BuildRequestAsync(cancellationToken: cancellationToken);
             return await _client.ExecStringAsync(request, GetCancellationFromKeyOrProvidedOne(cancellationToken));
+        }
+
+        public async Task<FluffAdvancedResponse<T>> ExecAdvancedAsync<T>(CancellationToken cancellationToken = default)
+        {
+            var request = await BuildRequestAsync(cancellationToken: cancellationToken);
+            return await _client.ExecAdvancedAsync<T>(request, GetCancellationFromKeyOrProvidedOne(cancellationToken));
         }
 
         #endregion

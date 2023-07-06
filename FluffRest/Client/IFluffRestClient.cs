@@ -1,5 +1,6 @@
 ﻿using FluffRest.Listener;
 using FluffRest.Request;
+using FluffRest.Request.Advanced;
 using FluffRest.Serializer;
 using FluffRest.Settings;
 using System.Collections.Generic;
@@ -149,6 +150,14 @@ namespace FluffRest.Client
         /// <param name="cancellationToken">Cancellation token to be forwarded.</param>
         /// <returns>Raw string result</returns>
         Task<string> ExecStringAsync(HttpRequestMessage buildedMessage, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Execute a builded request asyncronously and return advanced response.
+        /// </summary>
+        /// <typeparam name="T">Type for automatic json deserialization.</typeparam>
+        /// <param name="cancellationToken">Cancellation token to be forwarded.</param>
+        /// <returns></returns>
+        Task<FluffAdvancedResponse<T>> ExecAdvancedAsync<T>(HttpRequestMessage buildedMessage, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Get and cancel previously allocated cancellation token for this key.
