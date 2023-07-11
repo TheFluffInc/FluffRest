@@ -1,6 +1,7 @@
 ﻿using FluffRest.Exception;
 using FluffRest.Listener;
 using FluffRest.Request;
+using FluffRest.Request.Advanced;
 using FluffRest.Serializer;
 using FluffRest.Settings;
 using System;
@@ -268,6 +269,35 @@ namespace FluffRest.Client
                 await CallAfterRequestListenersAsync(result, cancellationToken);
                 var contentString = await result.Content.ReadAsStringAsync();
                 return contentString;
+            }
+            catch (HttpRequestException httpEx)
+            {
+                await CallRequestFailedListenersAsync(result, cancellationToken);
+                var stringContent = await result.Content.ReadAsStringAsync();
+                throw new FluffRequestException("Unhandled exception occured during processing of request", stringContent, result.StatusCode, _serializer, httpEx);
+            }
+        }
+
+        public async Task<FluffAdvancedResponse<T>> ExecAdvancedAsync<T>(HttpRequestMessage buildedMessage, CancellationToken cancellationToken = default)
+        {
+            HttpResponseMessage result = null;
+
+            try
+            {
+                buildedMessage = await CallBeforeSendListenersAsync(buildedMessage, cancellationToken);
+                result = await _httpClient.SendAsync(buildedMessage, cancellationToken);
+
+                if (_settings.EnsureSuccessCode)
+                {
+                    result.EnsureSuccessStatusCode();
+                }
+
+                await CallAfterRequestListenersAsync(result, cancellationToken);
+
+                var contentStream = await result.Content.ReadAsStreamAsync();
+                T objectResult = await _serializer.DeserializeAsync<T>(contentStream, cancellationToken);
+
+                return new FluffAdvancedResponse<T>(objectResult, result.StatusCode);
             }
             catch (HttpRequestException httpEx)
             {

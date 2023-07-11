@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using System.Threading;
 using System;
+using FluffRest.Request.Advanced;
 
 namespace FluffRest.Request
 {
@@ -27,6 +28,14 @@ namespace FluffRest.Request
         /// <param name="cancellationToken">Cancellation token to forward, setting this will override configured auto cancellation.</param>
         /// <returns></returns>
         Task<string> ExecStringAsync(CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Execute the request and return advanced response.
+        /// </summary>
+        /// <typeparam name="T">Type to map json received.</typeparam>
+        /// <param name="cancellationToken">Cancellation token to forward, setting this will override configured auto cancellation.</param>
+        /// <returns></returns>
+        Task<FluffAdvancedResponse<T>> ExecAdvancedAsync<T>(CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Add a header only to this request.
