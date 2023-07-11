@@ -46,7 +46,7 @@ namespace FluffRest.Request
         /// <exception cref="Exception.FluffDuplicateParameterException">Depending of the configuration of the client, duplicate keys will throw or have different behaviour, configure <see cref="Settings.FluffClientSettings"/> to override default settings.</exception>
         IFluffRequest AddQueryParameter(string key, string value);
 
-        // <summary>
+        /// <summary>
         /// Add a query parameter to the url path.
         /// </summary>
         /// <param name="key">key of the parameter</param>
@@ -55,7 +55,7 @@ namespace FluffRest.Request
         /// <exception cref="Exception.FluffDuplicateParameterException">Depending of the configuration of the client, duplicate keys will throw or have different behaviour, configure <see cref="Settings.FluffClientSettings"/> to override default settings.</exception>
         IFluffRequest AddQueryParameter(string key, int value);
 
-        // <summary>
+        /// <summary>
         /// Add a query parameter to the url path.
         /// </summary>
         /// <param name="key">key of the parameter</param>
@@ -64,7 +64,7 @@ namespace FluffRest.Request
         /// <exception cref="Exception.FluffDuplicateParameterException">Depending of the configuration of the client, duplicate keys will throw or have different behaviour, configure <see cref="Settings.FluffClientSettings"/> to override default settings.</exception>
         IFluffRequest AddQueryParameter(string key, short value);
 
-        // <summary>
+        /// <summary>
         /// Add a query parameter to the url path.
         /// </summary>
         /// <param name="key">key of the parameter</param>
@@ -72,6 +72,51 @@ namespace FluffRest.Request
         /// <returns>Request configured with this parameter.</returns>
         /// <exception cref="Exception.FluffDuplicateParameterException">Depending of the configuration of the client, duplicate keys will throw or have different behaviour, configure <see cref="Settings.FluffClientSettings"/> to override default settings.</exception>
         IFluffRequest AddQueryParameter(string key, long value);
+
+        /// <summary>
+        /// Add a query parameter to the url path.
+        /// </summary>
+        /// <param name="key">key of the parameter</param>
+        /// <param name="value">value of the parameter</param>
+        /// <returns>Request configured with this parameter.</returns>
+        /// <exception cref="Exception.FluffDuplicateParameterException">Depending of the configuration of the client, duplicate keys will throw or have different behaviour, configure <see cref="Settings.FluffClientSettings"/> to override default settings.</exception>
+        IFluffRequest AddQueryParameter(string key, decimal value);
+
+        /// <summary>
+        /// Add a query parameter to the url path.
+        /// </summary>
+        /// <param name="key">key of the parameter</param>
+        /// <param name="value">value of the parameter</param>
+        /// <returns>Request configured with this parameter.</returns>
+        /// <exception cref="Exception.FluffDuplicateParameterException">Depending of the configuration of the client, duplicate keys will throw or have different behaviour, configure <see cref="Settings.FluffClientSettings"/> to override default settings.</exception>
+        IFluffRequest AddQueryParameter(string key, int? value);
+
+        /// <summary>
+        /// Add a query parameter to the url path.
+        /// </summary>
+        /// <param name="key">key of the parameter</param>
+        /// <param name="value">value of the parameter</param>
+        /// <returns>Request configured with this parameter.</returns>
+        /// <exception cref="Exception.FluffDuplicateParameterException">Depending of the configuration of the client, duplicate keys will throw or have different behaviour, configure <see cref="Settings.FluffClientSettings"/> to override default settings.</exception>
+        IFluffRequest AddQueryParameter(string key, decimal? value);
+
+        /// <summary>
+        /// Add a query parameter to the url path.
+        /// </summary>
+        /// <param name="key">key of the parameter</param>
+        /// <param name="value">value of the parameter</param>
+        /// <returns>Request configured with this parameter.</returns>
+        /// <exception cref="Exception.FluffDuplicateParameterException">Depending of the configuration of the client, duplicate keys will throw or have different behaviour, configure <see cref="Settings.FluffClientSettings"/> to override default settings.</exception>
+        IFluffRequest AddQueryParameter(string key, short? value);
+
+        /// <summary>
+        /// Add a query parameter to the url path.
+        /// </summary>
+        /// <param name="key">key of the parameter</param>
+        /// <param name="value">value of the parameter</param>
+        /// <returns>Request configured with this parameter.</returns>
+        /// <exception cref="Exception.FluffDuplicateParameterException">Depending of the configuration of the client, duplicate keys will throw or have different behaviour, configure <see cref="Settings.FluffClientSettings"/> to override default settings.</exception>
+        IFluffRequest AddQueryParameter(string key, long? value);
 
         /// <summary>
         /// Add a json body in the request from a object that will be serialized into json.
