@@ -41,19 +41,22 @@ namespace FluffRest.Request
 
         public IFluffRequest AddQueryParameter(string key, string value)
         {
-            if (!_parameters.ContainsKey(key))
+            if (value != null)
             {
-                _parameters.Add(key, value);
-            }
-            else
-            {
-                if (_client.Settings.DuplicateParameterKeyHandling == Settings.FluffDuplicateParameterKeyHandling.Throw)
+                if (!_parameters.ContainsKey(key))
                 {
-                    throw new FluffDuplicateParameterException($"Trying to add duplicate key '{key}' in query paramters, either remove duplicate or configure the client");
+                    _parameters.Add(key, value);
                 }
-                else if (_client.Settings.DuplicateParameterKeyHandling == Settings.FluffDuplicateParameterKeyHandling.Replace)
+                else
                 {
-                    _parameters[key] = value;
+                    if (_client.Settings.DuplicateParameterKeyHandling == Settings.FluffDuplicateParameterKeyHandling.Throw)
+                    {
+                        throw new FluffDuplicateParameterException($"Trying to add duplicate key '{key}' in query paramters, either remove duplicate or configure the client");
+                    }
+                    else if (_client.Settings.DuplicateParameterKeyHandling == Settings.FluffDuplicateParameterKeyHandling.Replace)
+                    {
+                        _parameters[key] = value;
+                    }
                 }
             }
 
@@ -61,6 +64,11 @@ namespace FluffRest.Request
         }
 
         public IFluffRequest AddQueryParameter(string key, int value)
+        {
+            return AddQueryParameter(key, value.ToString());
+        }
+
+        public IFluffRequest AddQueryParameter(string key, decimal value)
         {
             return AddQueryParameter(key, value.ToString());
         }
@@ -73,6 +81,26 @@ namespace FluffRest.Request
         public IFluffRequest AddQueryParameter(string key, long value)
         {
             return AddQueryParameter(key, value.ToString());
+        }
+
+        public IFluffRequest AddQueryParameter(string key, int? value)
+        {
+            return AddQueryParameter(key, value?.ToString());
+        }
+
+        public IFluffRequest AddQueryParameter(string key, decimal? value)
+        {
+            return AddQueryParameter(key, value?.ToString());
+        }
+
+        public IFluffRequest AddQueryParameter(string key, short? value)
+        {
+            return AddQueryParameter(key, value?.ToString());
+        }
+
+        public IFluffRequest AddQueryParameter(string key, long? value)
+        {
+            return AddQueryParameter(key, value?.ToString());
         }
 
         #endregion

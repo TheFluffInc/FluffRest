@@ -136,5 +136,29 @@ namespace FluffRestTest.Tests
             Assert.AreEqual(result.Id, dto.Id);
             Assert.AreEqual(result.Name, dto.Name);
         }
+
+        [TestMethod]
+        public async Task NullParametersShouldNotBeAdded()
+        {
+            // Arrange
+
+            var dto = GetBasicDto();
+            var url = $"{TestUrl}/simple?id=1";
+            var json = System.Text.Json.JsonSerializer.Serialize(dto);
+            var httpClient = GetMockedClient(url, JsonContentType, json, HttpMethod.Get);
+            var options = new FluffClientSettings(FluffDuplicateParameterKeyHandling.Replace);
+            var fluffClient = new FluffRestClient(TestUrl, httpClient, options);
+
+            // Act
+            var result = await fluffClient.Get("simple")
+                .AddQueryParameter("id", 1)
+                .AddQueryParameter("name", (string)null)
+                .ExecAsync<TestUserDto>();
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual(result.Id, dto.Id);
+            Assert.AreEqual(result.Name, dto.Name);
+        }
     }
 }
