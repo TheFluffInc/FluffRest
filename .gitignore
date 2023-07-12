@@ -363,3 +363,4 @@ MigrationBackup/
 FodyWeavers.xsd
 /coveragereport
 /TestHelper/report
+/tools
