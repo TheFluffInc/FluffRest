@@ -216,9 +216,16 @@ namespace FluffRest.Client
                 await CallAfterRequestListenersAsync(result, cancellationToken);
 
                 var contentStream = await result.Content.ReadAsStreamAsync();
-                T objectResult = await _serializer.DeserializeAsync<T>(contentStream, cancellationToken);
-
-                return objectResult;
+                
+                if (contentStream.Length > 0)
+                {
+                    T objectResult = await _serializer.DeserializeAsync<T>(contentStream, cancellationToken);
+                    return objectResult;
+                }
+                else
+                {
+                    return default;
+                }
             }
             catch (HttpRequestException httpEx)
             {
@@ -295,9 +302,16 @@ namespace FluffRest.Client
                 await CallAfterRequestListenersAsync(result, cancellationToken);
 
                 var contentStream = await result.Content.ReadAsStreamAsync();
-                T objectResult = await _serializer.DeserializeAsync<T>(contentStream, cancellationToken);
 
-                return new FluffAdvancedResponse<T>(objectResult, result.StatusCode);
+                if (contentStream.Length > 0)
+                {
+                    T objectResult = await _serializer.DeserializeAsync<T>(contentStream, cancellationToken);
+                    return new FluffAdvancedResponse<T>(objectResult, result.StatusCode);
+                }
+                else
+                {
+                    return new FluffAdvancedResponse<T>(default, result.StatusCode);
+                }
             }
             catch (HttpRequestException httpEx)
             {
@@ -315,9 +329,9 @@ namespace FluffRest.Client
         {
             if (_listeners.Any())
             {
-                for (int i = 0; i < _listeners.Count(); i++)
+                for (int i = 0; i < _listeners.Count; i++)
                 {
-                    request = await _listeners.ElementAt(i).OnRequestSentAsync(request, cancellationToken);
+                    request = await _listeners[i].OnRequestSentAsync(request, cancellationToken);
                 }
             }
 
@@ -328,9 +342,9 @@ namespace FluffRest.Client
         {
             if (_listeners.Any())
             {
-                for (int i = 0; i < _listeners.Count(); i++)
+                for (int i = 0; i < _listeners.Count; i++)
                 {
-                    await _listeners.ElementAt(i).OnRequestReceivedAsync(httpResponseMessage, cancellationToken);
+                    await _listeners[i].OnRequestReceivedAsync(httpResponseMessage, cancellationToken);
                 }
             }
         }
@@ -339,9 +353,9 @@ namespace FluffRest.Client
         {
             if (_listeners.Any())
             {
-                for (int i = 0; i < _listeners.Count(); i++)
+                for (int i = 0; i < _listeners.Count; i++)
                 {
-                    await _listeners.ElementAt(i).OnRequestHttpFailedAsync(httpResponseMessage, cancellationToken);
+                    await _listeners[i].OnRequestHttpFailedAsync(httpResponseMessage, cancellationToken);
                 }
             }
         }
