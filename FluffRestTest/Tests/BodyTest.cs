@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
@@ -70,6 +71,51 @@ namespace FluffRestTest.Tests
             await fluffClient.Post("body")
                 .AddBody(body, contentType)
                 .ExecAsync();
+        }
+
+        [TestMethod]
+        public async Task TestEmptyResponseShouldReturnDefaultAsync()
+        {
+            // Arrange
+
+            var url = $"{TestUrl}/empty";
+            HttpResponseMessage response = new HttpResponseMessage()
+            {
+                Content = new StringContent(string.Empty),
+                StatusCode = HttpStatusCode.NoContent
+            };
+
+            var httpClient = GetMockedClient(url, response, HttpMethod.Get);
+            IFluffRestClient fluffClient = new FluffRestClient(TestUrl, httpClient);
+
+            // Act
+            var result = await fluffClient.Get("empty").ExecAsync<TestDto>();
+
+            // Assert
+            Assert.AreEqual(default, result);
+        }
+
+        [TestMethod]
+        public async Task TestAdvancedEmptyResponseShouldReturnDefaultAsync()
+        {
+            // Arrange
+
+            var url = $"{TestUrl}/empty";
+            HttpResponseMessage response = new HttpResponseMessage()
+            {
+                Content = new StringContent(string.Empty),
+                StatusCode = HttpStatusCode.NoContent
+            };
+
+            var httpClient = GetMockedClient(url, response, HttpMethod.Get);
+            IFluffRestClient fluffClient = new FluffRestClient(TestUrl, httpClient);
+
+            // Act
+            var result = await fluffClient.Get("empty").ExecAdvancedAsync<TestDto>();
+
+            // Assert
+            Assert.AreEqual(default, result.Content);
+            Assert.AreEqual(HttpStatusCode.NoContent, result.StatusCode);
         }
 
         public class TestDto
