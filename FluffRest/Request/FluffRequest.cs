@@ -26,12 +26,12 @@ namespace FluffRest.Request
         private string _rawBodyContentType;
         private string _cancellationKey;
 
-        internal FluffRequest(IFluffRestClient client, HttpMethod method, string route, string cancellationKey = null)
+        internal FluffRequest(IFluffRestClient client, HttpMethod method, string route, string cancellationKey = null, Dictionary<string, string> defaultParameters = null)
         {
             _client = client;
             _method = method;
             _route = route;
-            _parameters = new Dictionary<string, string>();
+            _parameters = defaultParameters ?? new Dictionary<string, string>();
             _headers = new Dictionary<string, string>();
             _body = null;
             _cancellationKey = cancellationKey;
@@ -49,11 +49,11 @@ namespace FluffRest.Request
                 }
                 else
                 {
-                    if (_client.Settings.DuplicateParameterKeyHandling == Settings.FluffDuplicateParameterKeyHandling.Throw)
+                    if (_client.Settings.DuplicateParameterKeyHandling == FluffDuplicateParameterKeyHandling.Throw)
                     {
                         throw new FluffDuplicateParameterException($"Trying to add duplicate key '{key}' in query paramters, either remove duplicate or configure the client");
                     }
-                    else if (_client.Settings.DuplicateParameterKeyHandling == Settings.FluffDuplicateParameterKeyHandling.Replace)
+                    else if (_client.Settings.DuplicateParameterKeyHandling == FluffDuplicateParameterKeyHandling.Replace)
                     {
                         _parameters[key] = value;
                     }

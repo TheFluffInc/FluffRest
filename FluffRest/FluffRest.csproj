@@ -15,7 +15,7 @@
     <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <Version>1.1.6</Version>
+    <Version>1.1.7</Version>
     <UserSecretsId>ec9bd9c5-5aa9-4334-b78f-307bd5678eea</UserSecretsId>
   </PropertyGroup>
 

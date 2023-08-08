@@ -1,12 +1,6 @@
-﻿ using FluffRest.Client;
-using FluffRest.Settings;
-using FluffRestTest.Dto;
+﻿using FluffRest.Client;
 using FluffRestTest.Infra;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace FluffRestTest.Tests

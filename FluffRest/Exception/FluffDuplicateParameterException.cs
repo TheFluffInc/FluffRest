@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace FluffRest.Exception
+﻿namespace FluffRest.Exception
 {
     public class FluffDuplicateParameterException : System.Exception
     {
