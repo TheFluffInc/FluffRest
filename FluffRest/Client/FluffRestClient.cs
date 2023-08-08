@@ -22,6 +22,7 @@ namespace FluffRest.Client
         private readonly FluffClientSettings _settings;
         private readonly Dictionary<string, string> _defaultHeaders;
         private readonly IFluffSerializer _serializer;
+        private readonly Dictionary<string, string> _defaultParameters;
         private List<IFluffListener> _listeners;
         private Dictionary<string, CancellationTokenSource> _cancellationTokens;
         private bool _useAutoCancel;
@@ -44,6 +45,7 @@ namespace FluffRest.Client
             _cancellationTokens = new Dictionary<string, CancellationTokenSource>();
             _useAutoCancel = false;
             _serializer = serializer ?? new JsonFluffSerializer(new JsonSerializerOptions(JsonSerializerDefaults.Web));
+            _defaultParameters = new Dictionary<string, string>();
         }
 
         public string BaseUrl => _baseUrl;
@@ -100,6 +102,74 @@ namespace FluffRest.Client
 
         #endregion
 
+        #region Default Parameters
+
+        public IFluffRestClient AddDefaultQueryParameter(string key, string value)
+        {
+            if (value != null)
+            {
+                if (!_defaultParameters.ContainsKey(key))
+                {
+                    _defaultParameters.Add(key, value);
+                }
+                else
+                {
+                    if (_settings.DuplicateParameterKeyHandling == FluffDuplicateParameterKeyHandling.Throw)
+                    {
+                        throw new FluffDuplicateParameterException($"Trying to add duplicate key '{key}' in query paramters, either remove duplicate or configure the client");
+                    }
+                    else if (_settings.DuplicateParameterKeyHandling == FluffDuplicateParameterKeyHandling.Replace)
+                    {
+                        _defaultParameters[key] = value;
+                    }
+                }
+            }
+
+            return this;
+        }
+
+        public IFluffRestClient AddDefaultQueryParameter(string key, int value)
+        {
+            return AddDefaultQueryParameter(key, value.ToString());
+        }
+
+        public IFluffRestClient AddDefaultQueryParameter(string key, short value)
+        {
+            return AddDefaultQueryParameter(key, value.ToString());
+        }
+
+        public IFluffRestClient AddDefaultQueryParameter(string key, long value)
+        {
+            return AddDefaultQueryParameter(key, value.ToString());
+        }
+
+        public IFluffRestClient AddDefaultQueryParameter(string key, decimal value)
+        {
+            return AddDefaultQueryParameter(key, value.ToString());
+        }
+
+        public IFluffRestClient AddDefaultQueryParameter(string key, int? value)
+        {
+            return AddDefaultQueryParameter(key, value?.ToString());
+        }
+
+        public IFluffRestClient AddDefaultQueryParameter(string key, decimal? value)
+        {
+            return AddDefaultQueryParameter(key, value?.ToString());
+        }
+
+        public IFluffRestClient AddDefaultQueryParameter(string key, short? value)
+        {
+            return AddDefaultQueryParameter(key, value?.ToString());
+        }
+
+        public IFluffRestClient AddDefaultQueryParameter(string key, long? value)
+        {
+            return AddDefaultQueryParameter(key, value?.ToString());
+        }
+
+        #endregion
+
         #region Request
 
         public IFluffRequest Get(string route)
@@ -143,7 +213,7 @@ namespace FluffRest.Client
                 }
             }
 
-            return new FluffRequest(this, method, route, cancellationKey);
+            return new FluffRequest(this, method, route, cancellationKey, _defaultParameters);
         }
 
         #endregion

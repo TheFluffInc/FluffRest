@@ -65,6 +65,87 @@ namespace FluffRest.Client
         IFluffRestClient AddAuth(string scheme, string value);
 
         /// <summary>
+        /// Add a default query parameter to the url path.
+        /// </summary>
+        /// <param name="key">key of the parameter</param>
+        /// <param name="value">value of the parameter</param>
+        /// <returns>Client configured with this parameter.</returns>
+        /// <exception cref="Exception.FluffDuplicateParameterException">Depending of the configuration of the client, duplicate keys will throw or have different behaviour, configure <see cref="Settings.FluffClientSettings"/> to override default settings.</exception>
+        IFluffRestClient AddDefaultQueryParameter(string key, string value);
+
+        /// <summary>
+        /// Add a default query parameter to the url path.
+        /// </summary>
+        /// <param name="key">key of the parameter</param>
+        /// <param name="value">value of the parameter</param>
+        /// <returns>Client configured with this parameter.</returns>
+        /// <exception cref="Exception.FluffDuplicateParameterException">Depending of the configuration of the client, duplicate keys will throw or have different behaviour, configure <see cref="Settings.FluffClientSettings"/> to override default settings.</exception>
+        IFluffRestClient AddDefaultQueryParameter(string key, int value);
+
+        /// <summary>
+        /// Add a default query parameter to the url path.
+        /// </summary>
+        /// <param name="key">key of the parameter</param>
+        /// <param name="value">value of the parameter</param>
+        /// <returns>Client configured with this parameter.</returns>
+        /// <exception cref="Exception.FluffDuplicateParameterException">Depending of the configuration of the client, duplicate keys will throw or have different behaviour, configure <see cref="Settings.FluffClientSettings"/> to override default settings.</exception>
+        IFluffRestClient AddDefaultQueryParameter(string key, short value);
+
+        /// <summary>
+        /// Add a default query parameter to the url path.
+        /// </summary>
+        /// <param name="key">key of the parameter</param>
+        /// <param name="value">value of the parameter</param>
+        /// <returns>Client configured with this parameter.</returns>
+        /// <exception cref="Exception.FluffDuplicateParameterException">Depending of the configuration of the client, duplicate keys will throw or have different behaviour, configure <see cref="Settings.FluffClientSettings"/> to override default settings.</exception>
+        IFluffRestClient AddDefaultQueryParameter(string key, long value);
+
+        /// <summary>
+        /// Add a default query parameter to the url path.
+        /// </summary>
+        /// <param name="key">key of the parameter</param>
+        /// <param name="value">value of the parameter</param>
+        /// <returns>Client configured with this parameter.</returns>
+        /// <exception cref="Exception.FluffDuplicateParameterException">Depending of the configuration of the client, duplicate keys will throw or have different behaviour, configure <see cref="Settings.FluffClientSettings"/> to override default settings.</exception>
+        IFluffRestClient AddDefaultQueryParameter(string key, decimal value);
+
+        /// <summary>
+        /// Add a default query parameter to the url path.
+        /// </summary>
+        /// <param name="key">key of the parameter</param>
+        /// <param name="value">value of the parameter</param>
+        /// <returns>Client configured with this parameter.</returns>
+        /// <exception cref="Exception.FluffDuplicateParameterException">Depending of the configuration of the client, duplicate keys will throw or have different behaviour, configure <see cref="Settings.FluffClientSettings"/> to override default settings.</exception>
+        IFluffRestClient AddDefaultQueryParameter(string key, int? value);
+
+        /// <summary>
+        /// Add a default query parameter to the url path.
+        /// </summary>
+        /// <param name="key">key of the parameter</param>
+        /// <param name="value">value of the parameter</param>
+        /// <returns>Client configured with this parameter.</returns>
+        /// <exception cref="Exception.FluffDuplicateParameterException">Depending of the configuration of the client, duplicate keys will throw or have different behaviour, configure <see cref="Settings.FluffClientSettings"/> to override default settings.</exception>
+        IFluffRestClient AddDefaultQueryParameter(string key, decimal? value);
+
+        /// <summary>
+        /// Add a default query parameter to the url path.
+        /// </summary>
+        /// <param name="key">key of the parameter</param>
+        /// <param name="value">value of the parameter</param>
+        /// <returns>Client configured with this parameter.</returns>
+        /// <exception cref="Exception.FluffDuplicateParameterException">Depending of the configuration of the client, duplicate keys will throw or have different behaviour, configure <see cref="Settings.FluffClientSettings"/> to override default settings.</exception>
+        IFluffRestClient AddDefaultQueryParameter(string key, short? value);
+
+        /// <summary>
+        /// Add a default query parameter to the url path.
+        /// </summary>
+        /// <param name="key">key of the parameter</param>
+        /// <param name="value">value of the parameter</param>
+        /// <returns>Client configured with this parameter.</returns>
+        /// <exception cref="Exception.FluffDuplicateParameterException">Depending of the configuration of the client, duplicate keys will throw or have different behaviour, configure <see cref="Settings.FluffClientSettings"/> to override default settings.</exception>
+        IFluffRestClient AddDefaultQueryParameter(string key, long? value);
+
+        /// <summary>
         /// Register a listner to this client.
         /// </summary>
         /// <param name="listener">Listner that will receive instructions.</param>

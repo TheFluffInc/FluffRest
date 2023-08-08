@@ -1,5 +1,4 @@
 ﻿using FluffRest.Client;
-using FluffRest.Exception;
 using FluffRestTest.Dto;
 using FluffRestTest.Infra;
 using System.Collections.Generic;
