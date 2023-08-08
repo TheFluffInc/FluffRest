@@ -3,11 +3,7 @@ using FluffRest.Exception;
 using FluffRest.Settings;
 using FluffRestTest.Dto;
 using FluffRestTest.Infra;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace FluffRestTest.Tests

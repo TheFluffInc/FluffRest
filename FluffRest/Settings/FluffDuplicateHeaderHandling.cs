@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace FluffRest.Settings
+﻿namespace FluffRest.Settings
 {
     /// <summary>
     /// Tells client how to handle conflicts in header names.

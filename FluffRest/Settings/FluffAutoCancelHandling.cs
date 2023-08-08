@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace FluffRest.Settings
+﻿namespace FluffRest.Settings
 {
     /// <summary>
     /// Controls how automatic cancellation of request made by the client will work.
