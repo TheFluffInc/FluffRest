@@ -31,10 +31,18 @@ namespace FluffRest.Request
             _client = client;
             _method = method;
             _route = route;
-            _parameters = defaultParameters ?? new Dictionary<string, string>();
+            _parameters = new Dictionary<string, string>();
             _headers = new Dictionary<string, string>();
             _body = null;
             _cancellationKey = cancellationKey;
+
+            if (defaultParameters?.Any() ?? false)
+            {
+                foreach (var param in defaultParameters)
+                {
+                    AddQueryParameter(param.Key, param.Value);
+                }
+            }
         }
 
         #region Query Parameters
