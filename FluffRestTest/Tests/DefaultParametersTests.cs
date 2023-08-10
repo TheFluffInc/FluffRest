@@ -6,6 +6,7 @@ using System;
 using System.Threading.Tasks;
 using FluffRest.Exception;
 using FluffRest.Settings;
+using System.Collections.Generic;
 
 namespace FluffRestTest.Tests;
 
@@ -106,5 +107,32 @@ public class DefaultParametersTests : BaseTest
         Assert.IsNotNull(result);
         Assert.AreEqual(result.Id, dto.Id);
         Assert.AreEqual(result.Name, dto.Name);
+    }
+
+    [TestMethod]
+    public async Task PreventDefaultParametersFromBeingUsedAsDefaultParameterListAsync()
+    {
+        // Arrange
+        var dto = GetBasicDto();
+        var url = $"{TestUrl}/simple?id=1";
+        var json = System.Text.Json.JsonSerializer.Serialize(dto);
+        var httpClient = GetMockedClient(url, JsonContentType, json, HttpMethod.Get);
+        var options = new FluffClientSettings(FluffDuplicateParameterKeyHandling.Throw);
+        var fluffClient = new FluffRestClient(TestUrl, httpClient, options);
+
+        List<TestUserDto> results = new List<TestUserDto>();
+
+        // Act
+        for (int i = 0; i < 10; i++)
+        {
+            var result = await fluffClient.Get("simple")
+                .AddQueryParameter("id", 1)
+                .ExecAsync<TestUserDto>();
+
+            results.Add(result);
+        }
+
+        // Assert
+        Assert.AreEqual(10, results.Count);
     }
 }

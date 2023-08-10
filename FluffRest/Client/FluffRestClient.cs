@@ -23,8 +23,8 @@ namespace FluffRest.Client
         private readonly Dictionary<string, string> _defaultHeaders;
         private readonly IFluffSerializer _serializer;
         private readonly Dictionary<string, string> _defaultParameters;
-        private List<IFluffListener> _listeners;
-        private Dictionary<string, CancellationTokenSource> _cancellationTokens;
+        private readonly List<IFluffListener> _listeners;
+        private readonly Dictionary<string, CancellationTokenSource> _cancellationTokens;
         private bool _useAutoCancel;
         private bool _disposedValue;
 
