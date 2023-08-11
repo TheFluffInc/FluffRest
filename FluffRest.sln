@@ -5,7 +5,9 @@ VisualStudioVersion = 17.4.33213.308
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FluffRest", "FluffRest\FluffRest.csproj", "{8DF927D1-C3BA-43BF-BF52-8D8B4D034D2D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FluffRestTest", "FluffRestTest\FluffRestTest.csproj", "{5C3BAA5F-F5D0-4A95-BAF2-BB6B48A638AA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FluffRestTest", "FluffRestTest\FluffRestTest.csproj", "{5C3BAA5F-F5D0-4A95-BAF2-BB6B48A638AA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FluffRestBenchmark", "FluffRestBenchmark\FluffRestBenchmark.csproj", "{526DE522-79A3-40E4-92FE-E9E83950AD4F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{5C3BAA5F-F5D0-4A95-BAF2-BB6B48A638AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5C3BAA5F-F5D0-4A95-BAF2-BB6B48A638AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5C3BAA5F-F5D0-4A95-BAF2-BB6B48A638AA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{526DE522-79A3-40E4-92FE-E9E83950AD4F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{526DE522-79A3-40E4-92FE-E9E83950AD4F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{526DE522-79A3-40E4-92FE-E9E83950AD4F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{526DE522-79A3-40E4-92FE-E9E83950AD4F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

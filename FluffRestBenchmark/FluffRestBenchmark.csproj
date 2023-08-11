@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" Version="0.13.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FluffRestTest\FluffRestTest.csproj" />
+    <ProjectReference Include="..\FluffRest\FluffRest.csproj" />
+  </ItemGroup>
+
+</Project>
