@@ -38,6 +38,13 @@ namespace FluffRest.Request
         Task<FluffAdvancedResponse<T>> ExecAdvancedAsync<T>(CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// Execute the request and return advanced response.
+        /// </summary>
+        /// <param name="cancellationToken">Cancellation token to forward, setting this will override configured auto cancellation.</param>
+        /// <returns></returns>
+        Task<FluffAdvancedResponse> ExecAdvancedRawAsync(CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// Add a header only to this request.
         /// </summary>
         /// <param name="key">Name of the header</param>
