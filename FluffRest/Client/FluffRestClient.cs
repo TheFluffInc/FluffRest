@@ -6,6 +6,7 @@ using FluffRest.Serializer;
 using FluffRest.Settings;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
@@ -58,6 +59,7 @@ namespace FluffRest.Client
 
         #region Default Headers & Auth
 
+        /// <inheritdoc/>
         public IFluffRestClient AddDefaultHeader(string key, string value)
         {
             if (!_defaultHeaders.ContainsKey(key))
@@ -79,6 +81,7 @@ namespace FluffRest.Client
             return this;
         }
 
+        /// <inheritdoc/>
         public IFluffRestClient AddBasicAuth(string username, string password)
         {
             var plainCredentials = $"{username}:{password}";
@@ -88,12 +91,14 @@ namespace FluffRest.Client
             return this;
         }
 
+        /// <inheritdoc/>
         public IFluffRestClient AddBearerAuth(string token)
         {
             AddDefaultHeader(AuthorizationHeader, $"Bearer {token}");
             return this;
         }
 
+        /// <inheritdoc/>
         public IFluffRestClient AddAuth(string scheme, string value)
         {
             var authHeader = $"{scheme} {value}";
@@ -104,6 +109,7 @@ namespace FluffRest.Client
 
         #region Default Parameters
 
+        /// <inheritdoc/>
         public IFluffRestClient AddDefaultQueryParameter(string key, string value)
         {
             if (value != null)
@@ -128,41 +134,49 @@ namespace FluffRest.Client
             return this;
         }
 
+        /// <inheritdoc/>
         public IFluffRestClient AddDefaultQueryParameter(string key, int value)
         {
             return AddDefaultQueryParameter(key, value.ToString());
         }
 
+        /// <inheritdoc/>
         public IFluffRestClient AddDefaultQueryParameter(string key, short value)
         {
             return AddDefaultQueryParameter(key, value.ToString());
         }
 
+        /// <inheritdoc/>
         public IFluffRestClient AddDefaultQueryParameter(string key, long value)
         {
             return AddDefaultQueryParameter(key, value.ToString());
         }
 
+        /// <inheritdoc/>
         public IFluffRestClient AddDefaultQueryParameter(string key, decimal value)
         {
             return AddDefaultQueryParameter(key, value.ToString());
         }
 
+        /// <inheritdoc/>
         public IFluffRestClient AddDefaultQueryParameter(string key, int? value)
         {
             return AddDefaultQueryParameter(key, value?.ToString());
         }
 
+        /// <inheritdoc/>
         public IFluffRestClient AddDefaultQueryParameter(string key, decimal? value)
         {
             return AddDefaultQueryParameter(key, value?.ToString());
         }
 
+        /// <inheritdoc/>
         public IFluffRestClient AddDefaultQueryParameter(string key, short? value)
         {
             return AddDefaultQueryParameter(key, value?.ToString());
         }
 
+        /// <inheritdoc/>
         public IFluffRestClient AddDefaultQueryParameter(string key, long? value)
         {
             return AddDefaultQueryParameter(key, value?.ToString());
@@ -172,31 +186,37 @@ namespace FluffRest.Client
 
         #region Request
 
+        /// <inheritdoc/>
         public IFluffRequest Get(string route)
         {
             return Request(HttpMethod.Get, route);
         }
 
+        /// <inheritdoc/>
         public IFluffRequest Post(string route)
         {
             return Request(HttpMethod.Post, route);
         }
 
+        /// <inheritdoc/>
         public IFluffRequest Patch(string route)
         {
             return Request(HttpMethod.Patch, route);
         }
 
+        /// <inheritdoc/>
         public IFluffRequest Put(string route)
         {
             return Request(HttpMethod.Put, route);
         }
 
+        /// <inheritdoc/>
         public IFluffRequest Delete(string route)
         {
             return Request(HttpMethod.Delete, route);
         }
 
+        /// <inheritdoc/>
         public IFluffRequest Request(HttpMethod method, string route)
         {
             string cancellationKey = null;
@@ -220,6 +240,7 @@ namespace FluffRest.Client
 
         #region Listener
 
+        /// <inheritdoc/>
         public IFluffRestClient RegisterListener(IFluffListener listener)
         {
             _listeners.Add(listener);
@@ -230,12 +251,14 @@ namespace FluffRest.Client
 
         #region Cancellation Token
 
+        /// <inheritdoc/>
         public IFluffRestClient WithAutoCancellation()
         {
             _useAutoCancel = true;
             return this;
         }
 
+        /// <inheritdoc/>
         public void CancellAllRequests()
         {
             if (_cancellationTokens.Any())
@@ -251,6 +274,7 @@ namespace FluffRest.Client
             _cancellationTokens.Clear();
         }
 
+        /// <inheritdoc/>
         public CancellationToken GetCancellationFromKey(string key)
         {
             if (_cancellationTokens.ContainsKey(key))
@@ -269,6 +293,7 @@ namespace FluffRest.Client
 
         #region Exec
 
+        /// <inheritdoc/>
         public async Task<T> ExecAsync<T>(HttpRequestMessage buildedMessage, CancellationToken cancellationToken = default)
         {
             HttpResponseMessage result = null;
@@ -305,6 +330,7 @@ namespace FluffRest.Client
             }
         }
 
+        /// <inheritdoc/>
         public async Task ExecAsync(HttpRequestMessage buildedMessage, CancellationToken cancellationToken = default)
         {
             HttpResponseMessage result = null;
@@ -329,6 +355,7 @@ namespace FluffRest.Client
             }
         }
 
+        /// <inheritdoc/>
         public async Task<string> ExecStringAsync(HttpRequestMessage buildedMessage, CancellationToken cancellationToken = default)
         {
             HttpResponseMessage result = null;
@@ -355,6 +382,7 @@ namespace FluffRest.Client
             }
         }
 
+        /// <inheritdoc/>
         public async Task<FluffAdvancedResponse<T>> ExecAdvancedAsync<T>(HttpRequestMessage buildedMessage, CancellationToken cancellationToken = default)
         {
             HttpResponseMessage result = null;
@@ -381,6 +409,43 @@ namespace FluffRest.Client
                 else
                 {
                     return new FluffAdvancedResponse<T>(default, result.StatusCode);
+                }
+            }
+            catch (HttpRequestException httpEx)
+            {
+                await CallRequestFailedListenersAsync(result, cancellationToken);
+                var stringContent = await result.Content.ReadAsStringAsync();
+                throw new FluffRequestException("Unhandled exception occured during processing of request", stringContent, result.StatusCode, _serializer, httpEx);
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task<FluffAdvancedResponse> ExecAdvancedRawAsync(HttpRequestMessage buildedMessage, CancellationToken cancellationToken = default)
+        {
+            HttpResponseMessage result = null;
+
+            try
+            {
+                buildedMessage = await CallBeforeSendListenersAsync(buildedMessage, cancellationToken);
+                result = await _httpClient.SendAsync(buildedMessage, cancellationToken);
+
+                if (_settings.EnsureSuccessCode)
+                {
+                    result.EnsureSuccessStatusCode();
+                }
+
+                await CallAfterRequestListenersAsync(result, cancellationToken);
+
+                var contentStream = await result.Content.ReadAsStreamAsync();
+
+                if (contentStream.Length > 0)
+                {
+                    var contentString = await result.Content.ReadAsStringAsync();
+                    return new FluffAdvancedResponse(contentString, result.StatusCode, _serializer);
+                }
+                else
+                {
+                    return new FluffAdvancedResponse(null, result.StatusCode, _serializer);
                 }
             }
             catch (HttpRequestException httpEx)
