@@ -47,6 +47,7 @@ namespace FluffRest.Request
 
         #region Query Parameters
 
+        /// <inheritdoc/>
         public IFluffRequest AddQueryParameter(string key, string value)
         {
             if (value != null)
@@ -71,41 +72,49 @@ namespace FluffRest.Request
             return this;
         }
 
+        /// <inheritdoc/>
         public IFluffRequest AddQueryParameter(string key, int value)
         {
             return AddQueryParameter(key, value.ToString());
         }
 
+        /// <inheritdoc/>
         public IFluffRequest AddQueryParameter(string key, decimal value)
         {
             return AddQueryParameter(key, value.ToString());
         }
 
+        /// <inheritdoc/>
         public IFluffRequest AddQueryParameter(string key, short value)
         {
             return AddQueryParameter(key, value.ToString());
         }
 
+        /// <inheritdoc/>
         public IFluffRequest AddQueryParameter(string key, long value)
         {
             return AddQueryParameter(key, value.ToString());
         }
 
+        /// <inheritdoc/>
         public IFluffRequest AddQueryParameter(string key, int? value)
         {
             return AddQueryParameter(key, value?.ToString());
         }
 
+        /// <inheritdoc/>
         public IFluffRequest AddQueryParameter(string key, decimal? value)
         {
             return AddQueryParameter(key, value?.ToString());
         }
 
+        /// <inheritdoc/>
         public IFluffRequest AddQueryParameter(string key, short? value)
         {
             return AddQueryParameter(key, value?.ToString());
         }
 
+        /// <inheritdoc/>
         public IFluffRequest AddQueryParameter(string key, long? value)
         {
             return AddQueryParameter(key, value?.ToString());
@@ -115,6 +124,7 @@ namespace FluffRest.Request
 
         #region Headers
 
+        /// <inheritdoc/>
         public IFluffRequest AddHeader(string key, string value)
         {
             if (!_headers.ContainsKey(key))
@@ -140,6 +150,7 @@ namespace FluffRest.Request
 
         #region Body
 
+        /// <inheritdoc/>
         public IFluffRequest AddBody<T>(T body)
         {
             if (_body != null)
@@ -152,6 +163,7 @@ namespace FluffRest.Request
             return this;
         }
 
+        /// <inheritdoc/>
         public IFluffRequest AddBody(string rawBody, string contentType = "application/json")
         {
             if (_body != null)
@@ -169,12 +181,14 @@ namespace FluffRest.Request
 
         #region Cancellation Token
 
+        /// <inheritdoc/>
         public IFluffRequest WithAutoCancellation(string cancellationKey = "default")
         {
             _cancellationKey = cancellationKey;
             return this;
         }
 
+        /// <inheritdoc/>
         public bool IsAutoCancellationConfigured()
         {
             return !string.IsNullOrEmpty(_cancellationKey);
@@ -184,28 +198,39 @@ namespace FluffRest.Request
 
         #region Execution
 
+        /// <inheritdoc/>
         public async Task<T> ExecAsync<T>(CancellationToken cancellationToken = default)
         {
             var request = await BuildRequestAsync("application/json", cancellationToken);
             return await _client.ExecAsync<T>(request, GetCancellationFromKeyOrProvidedOne(cancellationToken));
         }
 
+        /// <inheritdoc/>
         public async Task ExecAsync(CancellationToken cancellationToken = default)
         {
             var request = await BuildRequestAsync(cancellationToken: cancellationToken);
             await _client.ExecAsync(request, GetCancellationFromKeyOrProvidedOne(cancellationToken));
         }
 
+        /// <inheritdoc/>
         public async Task<string> ExecStringAsync(CancellationToken cancellationToken = default)
         {
             var request = await BuildRequestAsync(cancellationToken: cancellationToken);
             return await _client.ExecStringAsync(request, GetCancellationFromKeyOrProvidedOne(cancellationToken));
         }
 
+        /// <inheritdoc/>
         public async Task<FluffAdvancedResponse<T>> ExecAdvancedAsync<T>(CancellationToken cancellationToken = default)
         {
             var request = await BuildRequestAsync(cancellationToken: cancellationToken);
             return await _client.ExecAdvancedAsync<T>(request, GetCancellationFromKeyOrProvidedOne(cancellationToken));
+        }
+
+        /// <inheritdoc/>
+        public async Task<FluffAdvancedResponse> ExecAdvancedRawAsync(CancellationToken cancellationToken = default)
+        {
+            var request = await BuildRequestAsync(cancellationToken: cancellationToken);
+            return await _client.ExecAdvancedRawAsync(request, GetCancellationFromKeyOrProvidedOne(cancellationToken));
         }
 
         #endregion

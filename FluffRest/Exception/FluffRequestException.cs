@@ -26,7 +26,6 @@ namespace FluffRest.Exception
         {
             byte[] contentBytes = Encoding.UTF8.GetBytes(Content);
             MemoryStream stream = new MemoryStream(contentBytes);
-            var jsonWebOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
             return _serializer.DeserializeAsync<T>(stream, cancellationToken);
         }
     }
