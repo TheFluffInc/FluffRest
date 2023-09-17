@@ -1,4 +1,5 @@
-﻿using FluffRest.Exception;
+﻿using FluffRest.Compression;
+using FluffRest.Exception;
 using FluffRest.Listener;
 using FluffRest.Request;
 using FluffRest.Request.Advanced;
@@ -9,6 +10,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -25,6 +27,7 @@ namespace FluffRest.Client
         private readonly IFluffSerializer _serializer;
         private readonly Dictionary<string, string> _defaultParameters;
         private readonly List<IFluffListener> _listeners;
+        private readonly List<IFluffCompressor> _compressors;
         private readonly Dictionary<string, CancellationTokenSource> _cancellationTokens;
         private bool _useAutoCancel;
         private bool _disposedValue;
@@ -47,6 +50,7 @@ namespace FluffRest.Client
             _useAutoCancel = false;
             _serializer = serializer ?? new JsonFluffSerializer(new JsonSerializerOptions(JsonSerializerDefaults.Web));
             _defaultParameters = new Dictionary<string, string>();
+            _compressors = new List<IFluffCompressor>();
         }
 
         public string BaseUrl => _baseUrl;
@@ -249,6 +253,22 @@ namespace FluffRest.Client
 
         #endregion
 
+        #region Compression
+
+        /// <inheritdoc/>
+        public IFluffRestClient RegisterCompression(IFluffCompressor compressor)
+        {
+            if (_compressors.Exists(c => c.AcceptHeaderName == compressor.AcceptHeaderName))
+            {
+                throw new InvalidOperationException($"A register for {compressor.AcceptHeaderName} is already registred");
+            }
+
+            _compressors.Add(compressor);
+            return this;
+        }
+
+        #endregion
+
         #region Cancellation Token
 
         /// <inheritdoc/>
@@ -296,136 +316,104 @@ namespace FluffRest.Client
         /// <inheritdoc/>
         public async Task<T> ExecAsync<T>(HttpRequestMessage buildedMessage, CancellationToken cancellationToken = default)
         {
-            HttpResponseMessage result = null;
+            var result = await InternalRequestExecuteAsync(buildedMessage, cancellationToken);
+            var content = await GetBodyOfResponseAsync(result, cancellationToken);
 
-            try
+            if (content.Length > 0)
             {
-                buildedMessage = await CallBeforeSendListenersAsync(buildedMessage, cancellationToken);
-                result = await _httpClient.SendAsync(buildedMessage, cancellationToken);
-
-                if (_settings.EnsureSuccessCode)
-                {
-                    result.EnsureSuccessStatusCode();
-                }
-
-                await CallAfterRequestListenersAsync(result, cancellationToken);
-
-                var contentStream = await result.Content.ReadAsStreamAsync();
-                
-                if (contentStream.Length > 0)
-                {
-                    T objectResult = await _serializer.DeserializeAsync<T>(contentStream, cancellationToken);
-                    return objectResult;
-                }
-                else
-                {
-                    return default;
-                }
+                using var contentStream = new MemoryStream(content);
+                T objectResult = await _serializer.DeserializeAsync<T>(contentStream, cancellationToken);
+                return objectResult;
             }
-            catch (HttpRequestException httpEx)
+            else
             {
-                await CallRequestFailedListenersAsync(result, cancellationToken);
-                var stringContent = await result.Content.ReadAsStringAsync();
-                throw new FluffRequestException("Unhandled exception occured during processing of request", stringContent, result.StatusCode, _serializer, httpEx);
+                return default;
             }
         }
 
         /// <inheritdoc/>
-        public async Task ExecAsync(HttpRequestMessage buildedMessage, CancellationToken cancellationToken = default)
+        public Task ExecAsync(HttpRequestMessage buildedMessage, CancellationToken cancellationToken = default)
         {
-            HttpResponseMessage result = null;
-
-            try
-            {
-                buildedMessage = await CallBeforeSendListenersAsync(buildedMessage, cancellationToken);
-                result = await _httpClient.SendAsync(buildedMessage, cancellationToken);
-
-                if (_settings.EnsureSuccessCode)
-                {
-                    result.EnsureSuccessStatusCode();
-                }
-
-                await CallAfterRequestListenersAsync(result, cancellationToken);
-            }
-            catch (HttpRequestException httpEx)
-            {
-                await CallRequestFailedListenersAsync(result, cancellationToken);
-                var stringContent = await result.Content.ReadAsStringAsync();
-                throw new FluffRequestException("Unhandled exception occured during processing of request", stringContent, result.StatusCode, _serializer, httpEx);
-            }
+            return InternalRequestExecuteAsync(buildedMessage, cancellationToken);
         }
 
         /// <inheritdoc/>
         public async Task<string> ExecStringAsync(HttpRequestMessage buildedMessage, CancellationToken cancellationToken = default)
         {
-            HttpResponseMessage result = null;
-
-            try
-            {
-                buildedMessage = await CallBeforeSendListenersAsync(buildedMessage, cancellationToken);
-                result = await _httpClient.SendAsync(buildedMessage, cancellationToken);
-
-                if (_settings.EnsureSuccessCode)
-                {
-                    result.EnsureSuccessStatusCode();
-                }
-
-                await CallAfterRequestListenersAsync(result, cancellationToken);
-                var contentString = await result.Content.ReadAsStringAsync();
-                return contentString;
-            }
-            catch (HttpRequestException httpEx)
-            {
-                await CallRequestFailedListenersAsync(result, cancellationToken);
-                var stringContent = await result.Content.ReadAsStringAsync();
-                throw new FluffRequestException("Unhandled exception occured during processing of request", stringContent, result.StatusCode, _serializer, httpEx);
-            }
+            var result = await InternalRequestExecuteAsync(buildedMessage, cancellationToken);
+            var content = await GetBodyOfResponseAsync(result, cancellationToken);
+            return Encoding.UTF8.GetString(content);
         }
 
         /// <inheritdoc/>
         public async Task<FluffAdvancedResponse<T>> ExecAdvancedAsync<T>(HttpRequestMessage buildedMessage, CancellationToken cancellationToken = default)
         {
-            HttpResponseMessage result = null;
+            var result = await InternalRequestExecuteAsync(buildedMessage, cancellationToken);
+            var content = await GetBodyOfResponseAsync(result, cancellationToken);
 
-            try
+            if (content.Length > 0)
             {
-                buildedMessage = await CallBeforeSendListenersAsync(buildedMessage, cancellationToken);
-                result = await _httpClient.SendAsync(buildedMessage, cancellationToken);
-
-                if (_settings.EnsureSuccessCode)
-                {
-                    result.EnsureSuccessStatusCode();
-                }
-
-                await CallAfterRequestListenersAsync(result, cancellationToken);
-
-                var contentStream = await result.Content.ReadAsStreamAsync();
-
-                if (contentStream.Length > 0)
-                {
-                    T objectResult = await _serializer.DeserializeAsync<T>(contentStream, cancellationToken);
-                    return new FluffAdvancedResponse<T>(objectResult, result.StatusCode);
-                }
-                else
-                {
-                    return new FluffAdvancedResponse<T>(default, result.StatusCode);
-                }
+                using var contentStream = new MemoryStream(content);
+                T objectResult = await _serializer.DeserializeAsync<T>(contentStream, cancellationToken);
+                return new FluffAdvancedResponse<T>(objectResult, result.StatusCode);
             }
-            catch (HttpRequestException httpEx)
+            else
             {
-                await CallRequestFailedListenersAsync(result, cancellationToken);
-                var stringContent = await result.Content.ReadAsStringAsync();
-                throw new FluffRequestException("Unhandled exception occured during processing of request", stringContent, result.StatusCode, _serializer, httpEx);
+                return new FluffAdvancedResponse<T>(default, result.StatusCode);
             }
         }
 
         /// <inheritdoc/>
         public async Task<FluffAdvancedResponse> ExecAdvancedRawAsync(HttpRequestMessage buildedMessage, CancellationToken cancellationToken = default)
         {
+            var result = await InternalRequestExecuteAsync(buildedMessage, cancellationToken);
+            var content = await GetBodyOfResponseAsync(result, cancellationToken);
+
+            if (content.Length > 0)
+            {
+                return new FluffAdvancedResponse(Encoding.UTF8.GetString(content), result.StatusCode, _serializer);
+            }
+            else
+            {
+                return new FluffAdvancedResponse(null, result.StatusCode, _serializer);
+            }
+        }
+
+        #endregion
+
+        #region Private
+
+        private async Task<byte[]> GetBodyOfResponseAsync(HttpResponseMessage response, CancellationToken cancellationToken)
+        {
+            if (response.Content.Headers.ContentEncoding.Count > 0)
+            {
+                var encoding = response.Content.Headers.ContentEncoding.First();
+
+                var suitableCompressor = _compressors.FirstOrDefault(x => x.AcceptHeaderName == encoding);
+
+                if (suitableCompressor == null)
+                {
+                    throw new InvalidOperationException($"No compressor defined for encoding {encoding}, please add it to support this request");
+                }
+
+                using var httpStream = await response.Content.ReadAsStreamAsync();
+                return await suitableCompressor.DecompressAsync(httpStream, cancellationToken);
+            }
+            else
+            {
+                return await response.Content.ReadAsByteArrayAsync();
+            }
+        }
+
+        private async Task<HttpResponseMessage> InternalRequestExecuteAsync(HttpRequestMessage buildedMessage, CancellationToken cancellationToken = default)
+        {
             HttpResponseMessage result = null;
 
             try
             {
+                var acceptedEncodings = string.Join(", ", _compressors.Select(x => x.AcceptHeaderName));
+                buildedMessage.Headers.Add("Accept-Encoding", acceptedEncodings);
+
                 buildedMessage = await CallBeforeSendListenersAsync(buildedMessage, cancellationToken);
                 result = await _httpClient.SendAsync(buildedMessage, cancellationToken);
 
@@ -436,29 +424,16 @@ namespace FluffRest.Client
 
                 await CallAfterRequestListenersAsync(result, cancellationToken);
 
-                var contentStream = await result.Content.ReadAsStreamAsync();
-
-                if (contentStream.Length > 0)
-                {
-                    var contentString = await result.Content.ReadAsStringAsync();
-                    return new FluffAdvancedResponse(contentString, result.StatusCode, _serializer);
-                }
-                else
-                {
-                    return new FluffAdvancedResponse(null, result.StatusCode, _serializer);
-                }
+                return result;
             }
-            catch (HttpRequestException httpEx)
+            catch (HttpRequestException ex)
             {
                 await CallRequestFailedListenersAsync(result, cancellationToken);
-                var stringContent = await result.Content.ReadAsStringAsync();
-                throw new FluffRequestException("Unhandled exception occured during processing of request", stringContent, result.StatusCode, _serializer, httpEx);
+                var stringContent = result == null ? null : await result.Content.ReadAsStringAsync();
+                throw new FluffRequestException("Unhandled exception occured during processing of request", stringContent, result?.StatusCode ?? default, _serializer, ex);
             }
+
         }
-
-        #endregion
-
-        #region Private
 
         private async Task<HttpRequestMessage> CallBeforeSendListenersAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {

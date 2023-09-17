@@ -11,15 +11,20 @@ namespace FluffRestTest.Mocks
         public bool IsAfterRequestCalled { get; private set; }
         public bool IsRequestFailedCalled { get; private set; }
 
+        public HttpResponseMessage LastResponse { get; private set; }
+        public HttpRequestMessage LastRequest { get; private set; }
+
         public Task OnRequestHttpFailedAsync(HttpResponseMessage response, CancellationToken cancellationToken)
         {
             IsRequestFailedCalled = true;
+            LastResponse = response;
             return Task.CompletedTask;
         }
 
         public Task OnRequestReceivedAsync(HttpResponseMessage response, CancellationToken cancellationToken)
         {
             IsAfterRequestCalled = true;
+            LastResponse = response;
             return Task.CompletedTask;
         }
 
@@ -27,6 +32,7 @@ namespace FluffRestTest.Mocks
         {
             IsRequestSentCalled = true;
             request.Headers.Add("x-test-listner", "true");
+            LastRequest = request;
             return Task.FromResult(request);
         }
     }
