@@ -29,12 +29,12 @@ namespace FluffRestTest.Tests
             {
                 // Act
 
-                var result = await fluffClient.Get("error").ExecAsync<TestUserDto>();
+                await fluffClient.Get("error").ExecAsync<TestUserDto>();
             }
             catch (FluffRequestException ex)
             {
                 Assert.IsNotNull(ex.Content);
-                Assert.AreEqual(ex.StatusCode, System.Net.HttpStatusCode.InternalServerError);
+                Assert.AreEqual(System.Net.HttpStatusCode.InternalServerError, ex.StatusCode);
 
                 var jsonResult = await ex.DeserializeAsync<TestUserDto>();
 
@@ -68,7 +68,7 @@ namespace FluffRestTest.Tests
             catch (FluffRequestException ex)
             {
                 Assert.IsNotNull(ex.Content);
-                Assert.AreEqual(ex.StatusCode, System.Net.HttpStatusCode.InternalServerError);
+                Assert.AreEqual(System.Net.HttpStatusCode.InternalServerError, ex.StatusCode);
 
                 var jsonResult = await ex.DeserializeAsync<TestUserDto>();
 

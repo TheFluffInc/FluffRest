@@ -1,4 +1,5 @@
-﻿using FluffRest.Listener;
+﻿using FluffRest.Compression;
+using FluffRest.Listener;
 using FluffRest.Request;
 using FluffRest.Request.Advanced;
 using FluffRest.Serializer;
@@ -151,6 +152,14 @@ namespace FluffRest.Client
         /// <param name="listener">Listner that will receive instructions.</param>
         /// <returns></returns>
         IFluffRestClient RegisterListener(IFluffListener listener);
+
+        /// <summary>
+        /// Register a compression that the client can use.
+        /// </summary>
+        /// <param name="compressor">Compressor implementation to register.</param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException">If the accept header is already used by another implementation.</exception>
+        IFluffRestClient RegisterCompression(IFluffCompressor compressor);
 
         /// <summary>
         /// Make all requests use an automatic cancellation of request. Configure which tokens are sent to the requests by editing the settings <see cref="FluffClientSettings"/>
