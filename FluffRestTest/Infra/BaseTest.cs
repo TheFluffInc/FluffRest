@@ -50,6 +50,13 @@ namespace FluffRestTest.Infra
             return mockHttp.ToHttpClient();
         }
 
+        public HttpClient GetMockedBodyClient(string url, HttpMethod method, byte[] body, string contentEncoding = null)
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.When(method, url).Respond(req => GenerateReponse(body, contentEncoding));
+            return mockHttp.ToHttpClient();
+        }
+
         public HttpClient GetMockedBodyClientWithContentType(string url, HttpMethod method, string body, string contentType = null)
         {
             var mockHttp = new MockHttpMessageHandler();
@@ -65,6 +72,19 @@ namespace FluffRestTest.Infra
                 Name = "Test",
                 Date = DateTime.UtcNow
             };
+        }
+
+        private HttpResponseMessage GenerateReponse(byte[] content, string contentEncoding)
+        {
+            var response = new HttpResponseMessage(System.Net.HttpStatusCode.OK);
+            response.Content = new ByteArrayContent(content);
+
+            if (!string.IsNullOrEmpty(contentEncoding))
+            {
+                response.Content.Headers.ContentEncoding.Add(contentEncoding);
+            }
+
+            return response;
         }
 
         private HttpResponseMessage GenerateResponseIfHeaderExists(HttpRequestMessage req, string headerName, string headerValue, string content = null)
