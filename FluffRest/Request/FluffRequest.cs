@@ -233,6 +233,13 @@ namespace FluffRest.Request
             return await _client.ExecAdvancedRawAsync(request, GetCancellationFromKeyOrProvidedOne(cancellationToken));
         }
 
+        /// <inheritdoc/>
+        public async Task<FluffStreamAdvancedResponse> ExecStreamAsync(CancellationToken cancellationToken = default)
+        {
+            var request = await BuildRequestAsync(cancellationToken: cancellationToken);
+            return await _client.ExecStreamAsync(request, GetCancellationFromKeyOrProvidedOne(cancellationToken));
+        }
+
         #endregion
 
         #region Private

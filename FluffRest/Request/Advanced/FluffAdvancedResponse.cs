@@ -1,4 +1,5 @@
-﻿using FluffRest.Serializer;
+﻿using System;
+using FluffRest.Serializer;
 using System.IO;
 using System.Net;
 using System.Text;
@@ -52,6 +53,33 @@ namespace FluffRest.Request.Advanced
             byte[] contentBytes = Encoding.UTF8.GetBytes(Content);
             MemoryStream stream = new MemoryStream(contentBytes);
             return _serializer.DeserializeAsync<T>(stream, cancellationToken);
+        }
+    }
+
+    public sealed class FluffStreamAdvancedResponse : IAsyncDisposable
+    {
+        /// <summary>
+        /// The stream of the http content.
+        /// </summary>
+        public Stream ContentStream { get; private set; }
+        
+        /// <summary>
+        /// Status code from response.
+        /// </summary>
+        public HttpStatusCode StatusCode { get; private set; }
+
+        public FluffStreamAdvancedResponse(Stream contentStream, HttpStatusCode statusCode)
+        {
+            ContentStream = contentStream;
+            StatusCode = statusCode;
+        }
+        
+        public async ValueTask DisposeAsync()
+        {
+            if (ContentStream != null)
+            {
+                await ContentStream.DisposeAsync();
+            }
         }
     }
 }
