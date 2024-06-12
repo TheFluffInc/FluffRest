@@ -115,6 +115,34 @@ namespace FluffRestTest.Tests
             Assert.AreEqual(default, result.Content);
             Assert.AreEqual(HttpStatusCode.NoContent, result.StatusCode);
         }
+        
+        [TestMethod]
+        public async Task TestStreamAsync()
+        {
+            // Arrange
+
+            string content = "{\"date\": \"2023-05-13T21:15:01.000Z\"}";
+            var url = $"{TestUrl}/stream";
+            HttpResponseMessage response = new HttpResponseMessage()
+            {
+                Content = new StringContent(content),
+                StatusCode = HttpStatusCode.Created
+            };
+
+            var httpClient = GetMockedClient(url, response, HttpMethod.Get);
+            IFluffRestClient fluffClient = new FluffRestClient(TestUrl, httpClient);
+
+            // Act
+            await using var result = await fluffClient.Get("stream").ExecStreamAsync();
+            
+            // Assert
+            
+            using var reader = new StreamReader(result.ContentStream);
+            var readContent = await reader.ReadToEndAsync();
+            
+            Assert.AreEqual(content, readContent);
+            Assert.AreEqual(HttpStatusCode.Created, result.StatusCode);
+        }
 
         public class TestDto
         {

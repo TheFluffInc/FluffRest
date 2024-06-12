@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using System.Threading;
 using System;
+using FluffRest.Exception;
 using FluffRest.Request.Advanced;
 
 namespace FluffRest.Request
@@ -45,12 +46,19 @@ namespace FluffRest.Request
         Task<FluffAdvancedResponse> ExecAdvancedRawAsync(CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// Execute the request and get raw content stream.
+        /// </summary>
+        /// <param name="cancellationToken">Cancellation token to forward, setting this will override configured auto cancellation.</param>
+        /// <returns></returns>
+        Task<FluffStreamAdvancedResponse> ExecStreamAsync(CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// Add a header only to this request.
         /// </summary>
         /// <param name="key">Name of the header</param>
         /// <param name="value">Value of the header</param>
         /// <returns></returns>
-        /// <exception cref="Exception.FluffDuplicateParameterException">Depending of the configuration of the client, duplicate headers will throw or have different behaviour, configure <see cref="Settings.FluffClientSettings"/> to override default settings.</exception>
+        /// <exception cref="FluffDuplicateParameterException">Depending of the configuration of the client, duplicate headers will throw or have different behaviour, configure <see cref="Settings.FluffClientSettings"/> to override default settings.</exception>
         IFluffRequest AddHeader(string key, string value);
 
         /// <summary>
@@ -59,7 +67,7 @@ namespace FluffRest.Request
         /// <param name="key">key of the parameter</param>
         /// <param name="value">value of the parameter</param>
         /// <returns>Request configured with this parameter.</returns>
-        /// <exception cref="Exception.FluffDuplicateParameterException">Depending of the configuration of the client, duplicate keys will throw or have different behaviour, configure <see cref="Settings.FluffClientSettings"/> to override default settings.</exception>
+        /// <exception cref="FluffDuplicateParameterException">Depending of the configuration of the client, duplicate keys will throw or have different behaviour, configure <see cref="Settings.FluffClientSettings"/> to override default settings.</exception>
         IFluffRequest AddQueryParameter(string key, string value);
 
         /// <summary>
@@ -68,7 +76,7 @@ namespace FluffRest.Request
         /// <param name="key">key of the parameter</param>
         /// <param name="value">value of the parameter</param>
         /// <returns>Request configured with this parameter.</returns>
-        /// <exception cref="Exception.FluffDuplicateParameterException">Depending of the configuration of the client, duplicate keys will throw or have different behaviour, configure <see cref="Settings.FluffClientSettings"/> to override default settings.</exception>
+        /// <exception cref="FluffDuplicateParameterException">Depending of the configuration of the client, duplicate keys will throw or have different behaviour, configure <see cref="Settings.FluffClientSettings"/> to override default settings.</exception>
         IFluffRequest AddQueryParameter(string key, int value);
 
         /// <summary>
@@ -77,7 +85,7 @@ namespace FluffRest.Request
         /// <param name="key">key of the parameter</param>
         /// <param name="value">value of the parameter</param>
         /// <returns>Request configured with this parameter.</returns>
-        /// <exception cref="Exception.FluffDuplicateParameterException">Depending of the configuration of the client, duplicate keys will throw or have different behaviour, configure <see cref="Settings.FluffClientSettings"/> to override default settings.</exception>
+        /// <exception cref="FluffDuplicateParameterException">Depending of the configuration of the client, duplicate keys will throw or have different behaviour, configure <see cref="Settings.FluffClientSettings"/> to override default settings.</exception>
         IFluffRequest AddQueryParameter(string key, short value);
 
         /// <summary>
@@ -86,7 +94,7 @@ namespace FluffRest.Request
         /// <param name="key">key of the parameter</param>
         /// <param name="value">value of the parameter</param>
         /// <returns>Request configured with this parameter.</returns>
-        /// <exception cref="Exception.FluffDuplicateParameterException">Depending of the configuration of the client, duplicate keys will throw or have different behaviour, configure <see cref="Settings.FluffClientSettings"/> to override default settings.</exception>
+        /// <exception cref="FluffDuplicateParameterException">Depending of the configuration of the client, duplicate keys will throw or have different behaviour, configure <see cref="Settings.FluffClientSettings"/> to override default settings.</exception>
         IFluffRequest AddQueryParameter(string key, long value);
 
         /// <summary>
@@ -95,7 +103,7 @@ namespace FluffRest.Request
         /// <param name="key">key of the parameter</param>
         /// <param name="value">value of the parameter</param>
         /// <returns>Request configured with this parameter.</returns>
-        /// <exception cref="Exception.FluffDuplicateParameterException">Depending of the configuration of the client, duplicate keys will throw or have different behaviour, configure <see cref="Settings.FluffClientSettings"/> to override default settings.</exception>
+        /// <exception cref="FluffDuplicateParameterException">Depending of the configuration of the client, duplicate keys will throw or have different behaviour, configure <see cref="Settings.FluffClientSettings"/> to override default settings.</exception>
         IFluffRequest AddQueryParameter(string key, decimal value);
 
         /// <summary>
@@ -104,7 +112,7 @@ namespace FluffRest.Request
         /// <param name="key">key of the parameter</param>
         /// <param name="value">value of the parameter</param>
         /// <returns>Request configured with this parameter.</returns>
-        /// <exception cref="Exception.FluffDuplicateParameterException">Depending of the configuration of the client, duplicate keys will throw or have different behaviour, configure <see cref="Settings.FluffClientSettings"/> to override default settings.</exception>
+        /// <exception cref="FluffDuplicateParameterException">Depending of the configuration of the client, duplicate keys will throw or have different behaviour, configure <see cref="Settings.FluffClientSettings"/> to override default settings.</exception>
         IFluffRequest AddQueryParameter(string key, int? value);
 
         /// <summary>
@@ -113,7 +121,7 @@ namespace FluffRest.Request
         /// <param name="key">key of the parameter</param>
         /// <param name="value">value of the parameter</param>
         /// <returns>Request configured with this parameter.</returns>
-        /// <exception cref="Exception.FluffDuplicateParameterException">Depending of the configuration of the client, duplicate keys will throw or have different behaviour, configure <see cref="Settings.FluffClientSettings"/> to override default settings.</exception>
+        /// <exception cref="FluffDuplicateParameterException">Depending of the configuration of the client, duplicate keys will throw or have different behaviour, configure <see cref="Settings.FluffClientSettings"/> to override default settings.</exception>
         IFluffRequest AddQueryParameter(string key, decimal? value);
 
         /// <summary>
@@ -122,7 +130,7 @@ namespace FluffRest.Request
         /// <param name="key">key of the parameter</param>
         /// <param name="value">value of the parameter</param>
         /// <returns>Request configured with this parameter.</returns>
-        /// <exception cref="Exception.FluffDuplicateParameterException">Depending of the configuration of the client, duplicate keys will throw or have different behaviour, configure <see cref="Settings.FluffClientSettings"/> to override default settings.</exception>
+        /// <exception cref="FluffDuplicateParameterException">Depending of the configuration of the client, duplicate keys will throw or have different behaviour, configure <see cref="Settings.FluffClientSettings"/> to override default settings.</exception>
         IFluffRequest AddQueryParameter(string key, short? value);
 
         /// <summary>
@@ -131,7 +139,7 @@ namespace FluffRest.Request
         /// <param name="key">key of the parameter</param>
         /// <param name="value">value of the parameter</param>
         /// <returns>Request configured with this parameter.</returns>
-        /// <exception cref="Exception.FluffDuplicateParameterException">Depending of the configuration of the client, duplicate keys will throw or have different behaviour, configure <see cref="Settings.FluffClientSettings"/> to override default settings.</exception>
+        /// <exception cref="FluffDuplicateParameterException">Depending of the configuration of the client, duplicate keys will throw or have different behaviour, configure <see cref="Settings.FluffClientSettings"/> to override default settings.</exception>
         IFluffRequest AddQueryParameter(string key, long? value);
 
         /// <summary>
