@@ -379,6 +379,15 @@ namespace FluffRest.Client
             }
         }
 
+        /// <inheritdoc/>
+        public async Task<FluffStreamAdvancedResponse> ExecStreamAsync(HttpRequestMessage buildedMessage, CancellationToken cancellationToken = default)
+        {
+            var result = await InternalRequestExecuteAsync(buildedMessage, cancellationToken);
+            var stream = await result.Content.ReadAsStreamAsync();
+
+            return new FluffStreamAdvancedResponse(stream, result.StatusCode);
+        }
+
         #endregion
 
         #region Private
