@@ -255,6 +255,14 @@ namespace FluffRest.Client
         /// <param name="cancellationToken">Cancellation token to be forwarded.</param>
         /// <returns></returns>
         Task<FluffAdvancedResponse> ExecAdvancedRawAsync(HttpRequestMessage buildedMessage, CancellationToken cancellationToken = default);
+        
+        /// <summary>
+        /// Execute a builded request asyncronously and return advanced stream response.
+        /// Please note that no serializer or compression will be used with this call.
+        /// </summary>
+        /// <param name="cancellationToken">Cancellation token to be forwarded.</param>
+        /// <returns></returns>
+        Task<FluffStreamAdvancedResponse> ExecStreamAsync(HttpRequestMessage buildedMessage, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Get and cancel previously allocated cancellation token for this key.
