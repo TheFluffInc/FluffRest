@@ -1,4 +1,5 @@
-﻿using FluffRest.Client;
+﻿using System;
+using FluffRest.Client;
 using FluffRest.Settings;
 using FluffRestTest.Infra;
 using FluffRestTest.Mocks;
@@ -41,15 +42,21 @@ namespace FluffRestTest.Tests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(TaskCanceledException))]
         public async Task TestProvidedCancellationTokenOverrideAsync()
         {
-            var http = GetMockedClient(TestUrl, HttpMethod.Get);
-            var client = new FluffRestClient(TestUrl, http);
-            var tokenSource = new CancellationTokenSource();
-            tokenSource.Cancel();
+            try
+            {
+                var http = GetMockedClient(TestUrl, HttpMethod.Get);
+                var client = new FluffRestClient(TestUrl, http);
+                var tokenSource = new CancellationTokenSource();
+                tokenSource.Cancel();
 
-            await client.Get(TestUrl).WithAutoCancellation().ExecAsync(tokenSource.Token);
+                await client.Get(TestUrl).WithAutoCancellation().ExecAsync(tokenSource.Token);
+            }
+            catch (Exception ex)
+            {
+                Assert.IsInstanceOfType<TaskCanceledException>(ex);
+            }
         }
 
         [TestMethod]

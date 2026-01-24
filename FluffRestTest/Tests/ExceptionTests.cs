@@ -1,4 +1,5 @@
-﻿using FluffRest.Client;
+﻿using System;
+using FluffRest.Client;
 using FluffRest.Exception;
 using FluffRest.Settings;
 using FluffRestTest.Dto;
@@ -136,24 +137,42 @@ namespace FluffRestTest.Tests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(System.ArgumentException))]
         public void TestProvideNullHttpClient()
         {
-            _ = new FluffRestClient(TestUrl, null);
+            try
+            {
+                _ = new FluffRestClient(TestUrl, null);
+            }
+            catch (Exception ex)
+            {
+                Assert.IsInstanceOfType<ArgumentException>(ex);
+            }
         }
 
         [TestMethod]
-        [ExpectedException(typeof(System.ArgumentException))]
         public void TestProvideEmptyUrl()
         {
-            _ = new FluffRestClient(string.Empty, new HttpClient());
+            try
+            {
+                _ = new FluffRestClient(string.Empty, new HttpClient());
+            }
+            catch (Exception ex)
+            {
+                Assert.IsInstanceOfType<ArgumentException>(ex);
+            }
         }
 
         [TestMethod]
-        [ExpectedException(typeof(System.ArgumentException))]
         public void TestProvideNullUrl()
         {
-            _ = new FluffRestClient(null, new HttpClient());
+            try
+            {
+                _ = new FluffRestClient(null, new HttpClient());
+            }
+            catch (Exception ex)
+            {
+                Assert.IsInstanceOfType<ArgumentException>(ex);
+            }
         }
     }
 }

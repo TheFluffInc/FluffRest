@@ -2,6 +2,8 @@
 using FluffRest.Serializer;
 using System.IO;
 using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
@@ -19,11 +21,17 @@ namespace FluffRest.Request.Advanced
         /// Status code from response.
         /// </summary>
         public HttpStatusCode StatusCode { get; private set; }
+        
+        /// <summary>
+        /// Headers from response.
+        /// </summary>
+        public HttpResponseHeaders Headers { get; private set; }
 
-        internal FluffAdvancedResponse(T content, HttpStatusCode statusCode)
+        internal FluffAdvancedResponse(T content, HttpStatusCode statusCode, HttpResponseHeaders headers)
         {
             Content = content;
             StatusCode = statusCode;
+            Headers = headers;
         }
     }
 
@@ -40,12 +48,18 @@ namespace FluffRest.Request.Advanced
         /// Status code from response.
         /// </summary>
         public HttpStatusCode StatusCode { get; private set; }
+        
+        /// <summary>
+        /// Headers from response.
+        /// </summary>
+        public HttpResponseHeaders Headers { get; private set; }
 
-        internal FluffAdvancedResponse(string content, HttpStatusCode statusCode, IFluffSerializer serializer)
+        internal FluffAdvancedResponse(string content, HttpStatusCode statusCode, IFluffSerializer serializer, HttpResponseHeaders headers)
         {
             Content = content;
             StatusCode = statusCode;
             _serializer = serializer;
+            Headers = headers;
         }
 
         public Task<T> DeserializeAsync<T>(CancellationToken cancellationToken = default)

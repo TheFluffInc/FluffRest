@@ -355,11 +355,11 @@ namespace FluffRest.Client
             {
                 using var contentStream = new MemoryStream(content);
                 T objectResult = await _serializer.DeserializeAsync<T>(contentStream, cancellationToken);
-                return new FluffAdvancedResponse<T>(objectResult, result.StatusCode);
+                return new FluffAdvancedResponse<T>(objectResult, result.StatusCode, result.Headers);
             }
             else
             {
-                return new FluffAdvancedResponse<T>(default, result.StatusCode);
+                return new FluffAdvancedResponse<T>(default, result.StatusCode, result.Headers);
             }
         }
 
@@ -371,11 +371,11 @@ namespace FluffRest.Client
 
             if (content.Length > 0)
             {
-                return new FluffAdvancedResponse(Encoding.UTF8.GetString(content), result.StatusCode, _serializer);
+                return new FluffAdvancedResponse(Encoding.UTF8.GetString(content), result.StatusCode, _serializer, result.Headers);
             }
             else
             {
-                return new FluffAdvancedResponse(null, result.StatusCode, _serializer);
+                return new FluffAdvancedResponse(null, result.StatusCode, _serializer, result.Headers);
             }
         }
 
@@ -435,13 +435,20 @@ namespace FluffRest.Client
 
                 return result;
             }
-            catch (HttpRequestException ex)
+            catch (System.Exception ex)
             {
                 await CallRequestFailedListenersAsync(result, cancellationToken);
                 var stringContent = result == null ? null : await result.Content.ReadAsStringAsync();
-                throw new FluffRequestException("Unhandled exception occured during processing of request", stringContent, result?.StatusCode ?? default, _serializer, ex);
-            }
 
+                if (ex is TaskCanceledException)
+                {
+                    throw;
+                }
+                else
+                {
+                    throw new FluffRequestException("Unhandled exception occured during processing of request", stringContent, result?.StatusCode ?? default, _serializer, ex);
+                }
+            }
         }
 
         private async Task<HttpRequestMessage> CallBeforeSendListenersAsync(HttpRequestMessage request, CancellationToken cancellationToken)
