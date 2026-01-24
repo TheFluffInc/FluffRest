@@ -51,7 +51,7 @@ namespace FluffRestTest.Tests
             await fluffClient.Get("encoding").ExecAsync();
 
             // Assert
-            Assert.AreEqual(null, listener.LastRequest.Headers.AcceptEncoding?.FirstOrDefault()?.Value);
+            Assert.IsNull(listener.LastRequest.Headers.AcceptEncoding?.FirstOrDefault()?.Value);
         }
 
         [TestMethod]

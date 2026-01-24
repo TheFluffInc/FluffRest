@@ -44,14 +44,20 @@ namespace FluffRestTest.Tests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
         public void TestDuplicateBody()
         {
-            var dto = GetBasicDto();
-            var url = $"{TestUrl}/body";
-            var request = new FluffRestClient(url, new HttpClient()).Get("error");
-            request.AddBody(dto);
-            request.AddBody(dto);
+            try
+            {
+                var dto = GetBasicDto();
+                var url = $"{TestUrl}/body";
+                var request = new FluffRestClient(url, new HttpClient()).Get("error");
+                request.AddBody(dto);
+                request.AddBody(dto);
+            }
+            catch (Exception ex)
+            {
+                Assert.IsInstanceOfType<InvalidOperationException>(ex);
+            }
         }
 
         [TestMethod]

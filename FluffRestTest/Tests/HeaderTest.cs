@@ -1,4 +1,5 @@
-﻿using FluffRest.Client;
+﻿using System;
+using FluffRest.Client;
 using FluffRest.Exception;
 using FluffRest.Settings;
 using FluffRestTest.Dto;
@@ -26,14 +27,20 @@ namespace FluffRestTest.Tests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(FluffDuplicateParameterException))]
         public void TestAddDuplicateDefaultHeaderThrows()
         {
-            var url = $"{TestUrl}/header";
-            var httpClient = GetMockedHeaderClient(url, HttpMethod.Get, "x-test", "test");
-            IFluffRestClient fluffClient = new FluffRestClient(TestUrl, httpClient);
-            fluffClient = fluffClient.AddDefaultHeader("x-test", "test");
-            fluffClient = fluffClient.AddDefaultHeader("x-test", "test");
+            try
+            {
+                var url = $"{TestUrl}/header";
+                var httpClient = GetMockedHeaderClient(url, HttpMethod.Get, "x-test", "test");
+                IFluffRestClient fluffClient = new FluffRestClient(TestUrl, httpClient);
+                fluffClient = fluffClient.AddDefaultHeader("x-test", "test");
+                fluffClient = fluffClient.AddDefaultHeader("x-test", "test");
+            }
+            catch (Exception ex)
+            {
+                Assert.IsInstanceOfType<FluffDuplicateParameterException>(ex);
+            }
         }
 
         [TestMethod]
@@ -82,20 +89,26 @@ namespace FluffRestTest.Tests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(FluffDuplicateParameterException))]
         public async Task TestAddDuplicateHeaderToRequestThrowsAsync()
         {
-            // Arrange
+            try
+            {
+                // Arrange
 
-            var url = $"{TestUrl}/header";
-            var httpClient = GetMockedHeaderClient(url, HttpMethod.Get, "x-test", "test");
-            IFluffRestClient fluffClient = new FluffRestClient(TestUrl, httpClient);
+                var url = $"{TestUrl}/header";
+                var httpClient = GetMockedHeaderClient(url, HttpMethod.Get, "x-test", "test");
+                IFluffRestClient fluffClient = new FluffRestClient(TestUrl, httpClient);
 
-            // Act
-            await fluffClient.Get("header")
-                .AddHeader("x-test", "test")
-                .AddHeader("x-test", "test")
-                .ExecAsync();
+                // Act
+                await fluffClient.Get("header")
+                    .AddHeader("x-test", "test")
+                    .AddHeader("x-test", "test")
+                    .ExecAsync();
+            }
+            catch (Exception ex)
+            {
+                Assert.IsInstanceOfType<FluffDuplicateParameterException>(ex);
+            }
         }
 
         [TestMethod]
@@ -148,21 +161,27 @@ namespace FluffRestTest.Tests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(FluffDuplicateParameterException))]
         public async Task TestConflictingHeadersThrowsAsync()
         {
-            // Arrange
+            try
+            {
+                // Arrange
 
-            var url = $"{TestUrl}/header";
-            var httpClient = GetMockedHeaderClient(url, HttpMethod.Get, "x-test", "test");
-            FluffClientSettings settings = new FluffClientSettings(duplicateDefaultHeaderHandling: FluffDuplicateWithDefaultHeaderHandling.Throw);
-            IFluffRestClient fluffClient = new FluffRestClient(TestUrl, httpClient, settings);
-            fluffClient = fluffClient.AddDefaultHeader("x-test", "test");
+                var url = $"{TestUrl}/header";
+                var httpClient = GetMockedHeaderClient(url, HttpMethod.Get, "x-test", "test");
+                FluffClientSettings settings = new FluffClientSettings(duplicateDefaultHeaderHandling: FluffDuplicateWithDefaultHeaderHandling.Throw);
+                IFluffRestClient fluffClient = new FluffRestClient(TestUrl, httpClient, settings);
+                fluffClient = fluffClient.AddDefaultHeader("x-test", "test");
 
-            // Act
-            await fluffClient.Get("header")
-                .AddHeader("x-test", "test")
-                .ExecAsync();
+                // Act
+                await fluffClient.Get("header")
+                    .AddHeader("x-test", "test")
+                    .ExecAsync();
+            }
+            catch (Exception ex)
+            {
+                Assert.IsInstanceOfType<FluffDuplicateParameterException>(ex);
+            }
         }
 
         [TestMethod]

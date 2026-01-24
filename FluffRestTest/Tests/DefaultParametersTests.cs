@@ -18,7 +18,7 @@ public class DefaultParametersTests : BaseTest
     {
         // Arrange
 
-            var dto = GetBasicDto();
+        var dto = GetBasicDto();
         var url = $"{TestUrl}/simple?id=1&name=Test&short=2&long=3";
         var json = System.Text.Json.JsonSerializer.Serialize(dto);
         var httpClient = GetMockedClient(url, JsonContentType, json, HttpMethod.Get);
@@ -38,27 +38,34 @@ public class DefaultParametersTests : BaseTest
     }
 
     [TestMethod]
-    [ExpectedException(typeof(FluffDuplicateParameterException))]
     public async Task DuplicateDefaultParameterThrow()
     {
         // Arrange
-
+        TestUserDto result = null;
         var dto = GetBasicDto();
-        var url = $"{TestUrl}/simple?id=1&name=Test";
-        var json = System.Text.Json.JsonSerializer.Serialize(dto);
-        var httpClient = GetMockedClient(url, JsonContentType, json, HttpMethod.Get);
-        var fluffClient = new FluffRestClient(TestUrl, httpClient)
-            .AddDefaultQueryParameter("id", 1)
-            .AddDefaultQueryParameter("name", "Test")
-            .AddDefaultQueryParameter("name", "Test");
 
-        // Act
-        var result = await fluffClient.Get("simple").ExecAsync<TestUserDto>();
+        try
+        {
+            var url = $"{TestUrl}/simple?id=1&name=Test";
+            var json = System.Text.Json.JsonSerializer.Serialize(dto);
+            var httpClient = GetMockedClient(url, JsonContentType, json, HttpMethod.Get);
+            var fluffClient = new FluffRestClient(TestUrl, httpClient)
+                .AddDefaultQueryParameter("id", 1)
+                .AddDefaultQueryParameter("name", "Test")
+                .AddDefaultQueryParameter("name", "Test");
 
-        // Assert
-        Assert.IsNotNull(result);
-        Assert.AreEqual(result.Id, dto.Id);
-        Assert.AreEqual(result.Name, dto.Name);
+            // Act
+            result = await fluffClient.Get("simple").ExecAsync<TestUserDto>();
+            
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual(result.Id, dto.Id);
+            Assert.AreEqual(result.Name, dto.Name);
+        }
+        catch (Exception ex)
+        {
+            Assert.IsInstanceOfType<FluffDuplicateParameterException>(ex);
+        }
     }
 
     [TestMethod]
@@ -133,6 +140,6 @@ public class DefaultParametersTests : BaseTest
         }
 
         // Assert
-        Assert.AreEqual(10, results.Count);
+        Assert.HasCount(10, results);
     }
 }

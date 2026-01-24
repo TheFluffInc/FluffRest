@@ -1,4 +1,5 @@
-﻿using FluffRest.Client;
+﻿using System;
+using FluffRest.Client;
 using FluffRestTest.Infra;
 using FluffRestTest.Mocks;
 using System.Net.Http;
@@ -45,8 +46,9 @@ namespace FluffRestTest.Tests
             {
                 await fluffClient.Get("listener").ExecAsync();
             }
-            catch
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.ToString());
             }
 
             // Assert

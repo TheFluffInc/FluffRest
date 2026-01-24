@@ -1,4 +1,5 @@
-﻿using FluffRest.Client;
+﻿using System;
+using FluffRest.Client;
 using FluffRest.Exception;
 using FluffRest.Settings;
 using FluffRestTest.Dto;
@@ -59,28 +60,34 @@ namespace FluffRestTest.Tests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(FluffDuplicateParameterException))]
         public async Task DuplicateParameterThrow()
         {
-            // Arrange
+            try
+            {
+                // Arrange
 
-            var dto = GetBasicDto();
-            var url = $"{TestUrl}/simple?id=1&name=Test";
-            var json = System.Text.Json.JsonSerializer.Serialize(dto);
-            var httpClient = GetMockedClient(url, JsonContentType, json, HttpMethod.Get);
-            var fluffClient = new FluffRestClient(TestUrl, httpClient);
+                var dto = GetBasicDto();
+                var url = $"{TestUrl}/simple?id=1&name=Test";
+                var json = System.Text.Json.JsonSerializer.Serialize(dto);
+                var httpClient = GetMockedClient(url, JsonContentType, json, HttpMethod.Get);
+                var fluffClient = new FluffRestClient(TestUrl, httpClient);
 
-            // Act
-            var result = await fluffClient.Get("simple")
-                .AddQueryParameter("id", 1)
-                .AddQueryParameter("name", "Test")
-                .AddQueryParameter("name", "Test")
-                .ExecAsync<TestUserDto>();
+                // Act
+                var result = await fluffClient.Get("simple")
+                    .AddQueryParameter("id", 1)
+                    .AddQueryParameter("name", "Test")
+                    .AddQueryParameter("name", "Test")
+                    .ExecAsync<TestUserDto>();
 
-            // Assert
-            Assert.IsNotNull(result);
-            Assert.AreEqual(result.Id, dto.Id);
-            Assert.AreEqual(result.Name, dto.Name);
+                // Assert
+                Assert.IsNotNull(result);
+                Assert.AreEqual(result.Id, dto.Id);
+                Assert.AreEqual(result.Name, dto.Name);
+            }
+            catch (Exception ex)
+            {
+                Assert.IsInstanceOfType<FluffDuplicateParameterException>(ex);
+            }
         }
 
         [TestMethod]

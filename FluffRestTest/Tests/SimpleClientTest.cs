@@ -111,7 +111,7 @@ namespace FluffRestTest.Tests
         }
 
         [TestMethod]
-        [DynamicData(nameof(GetHttpMethods), DynamicDataSourceType.Method)]
+        [DynamicData(nameof(GetHttpMethods))]
         public async Task TestExcecuteBasicCustomRequest(HttpMethod method)
         {
             // Arrange
