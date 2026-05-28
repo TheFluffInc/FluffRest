@@ -421,7 +421,10 @@ namespace FluffRest.Client
             try
             {
                 var acceptedEncodings = string.Join(", ", _compressors.Select(x => x.AcceptHeaderName));
-                buildedMessage.Headers.Add("Accept-Encoding", acceptedEncodings);
+                if (!string.IsNullOrEmpty(acceptedEncodings))
+                {
+                    buildedMessage.Headers.Add("Accept-Encoding", acceptedEncodings);
+                }
 
                 buildedMessage = await CallBeforeSendListenersAsync(buildedMessage, cancellationToken);
                 result = await _httpClient.SendAsync(buildedMessage, cancellationToken);
